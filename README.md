@@ -9,3 +9,4 @@ Agents are entities designed to assist users in interacting with Smart Contracts
 1. 1inch
 2. Uniswap
 3. Worldcoin
+4. LayerZero
