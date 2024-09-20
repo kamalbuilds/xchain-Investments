@@ -1,101 +1,143 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from "react"
+import { HashLock, NetworkEnum, SDK } from "1inch-xchain-sdk"
+import { randomBytes, solidityPackedKeccak256 } from "ethers"
+import { useAccount } from "wagmi"
+
+import { Button } from "@/components/ui/button"
+import ProjectsPage from "@/components/PagesProjects"
+import FusionSwap from "@/components/fusion.swap"
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { address, isConnected, chainId } = useAccount()
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+  const [quote, setQuote] = useState()
+  console.log("chain", chainId)
+
+  const sdk = new SDK({
+    url: "https://api.1inch.dev/fusion-plus",
+    authKey: "okz7YzxXA8DPc7eehhXbolnROttzvKYA",
+  })
+
+  console.log(sdk, "sdk")
+
+  const getQuote = async () => {
+    const sourceChain = 1
+    const destinationChain = 137
+    const srcTokenAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2" //WETH
+    const dstTokenAddress = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174" //USDC
+    const amount = "50000000000000000"
+    const walletAddress = address
+
+    try {
+      const res = await fetch("/api/getQuote", {
+        method: "POST",
+        body: JSON.stringify({
+          sourceChain,
+          destinationChain,
+          srcTokenAddress,
+          dstTokenAddress,
+          amount,
+          walletAddress,
+        }),
+      })
+
+      const response = await res.json()
+      setQuote(response)
+      console.log("Response", response)
+      return response.tx
+    } catch (error) {
+      console.log("Error >>>", error)
+    }
+  }
+
+  const createorder = async () => {
+    const sourceChain = 1
+    const destinationChain = 137
+    const srcTokenAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2" //WETH
+    const dstTokenAddress = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174" //USDC
+    const amount = "50000000000000000"
+    const walletAddress = address
+    const quoteId = "77d37717-3439-4e44-869f-b1f29b6ab776"
+
+    console.log("quote is >>>>", quote)
+
+    const params = {
+      srcChainId: NetworkEnum.ETHEREUM,
+      dstChainId: NetworkEnum.GNOSIS,
+      srcTokenAddress: "0x6b175474e89094c44da98b954eedeac495271d0f",
+      dstTokenAddress: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      amount: "1000000000000000000000",
+    }
+
+    try {
+      const res = await fetch("/api/buildOrder", {
+        method: "POST",
+        body: JSON.stringify({
+          quote: {
+            quote,
+            walletAddress: "0x9452BCAf507CD6547574b78B810a723d8868C85a",
+          },
+          secretHashList: [
+            "0x315b47a8c3780434b153667588db4ca628526e20000000000000000000000000",
+          ],
+        }),
+      })
+
+      const response = await res.json()
+      console.log("Response", response)
+      return response.tx
+    } catch (error) {
+      console.log("Error >>>", error)
+    }
+  }
+
+  const CreatexchainOrder = async () => {
+    const params = {
+      srcChainId: 1,
+      dstChainId: 137,
+      srcTokenAddress: "0x6b175474e89094c44da98b954eedeac495271d0f",
+      dstTokenAddress: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      amount: "1000000000000000000000",
+    }
+
+    try {
+      const res = await fetch("/api/fusionOrder", {
+        method: "POST",
+        body: JSON.stringify({
+          quote: {
+            quote,
+            walletAddress: "0x9452BCAf507CD6547574b78B810a723d8868C85a",
+          },
+          secretHashList: [
+            "0x315b47a8c3780434b153667588db4ca628526e20000000000000000000000000",
+          ],
+        }),
+      })
+
+      const response = await res.json()
+      console.log("Response", response)
+      return response.tx
+    } catch (error) {
+      console.log("Error >>>", error)
+    }
+  }
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between md:p-24">
+      <div>
+        <p>wagmi connected: {isConnected ? "true" : "false"}</p>
+        <p>wagmi address: {address}</p>
+        <p>wagmi network: {chainId}</p>
+      </div>
+
+      <Button onClick={getQuote}>Get Quote</Button>
+      <Button onClick={CreatexchainOrder}>Create Order</Button>
+
+      <FusionSwap />
+
+      {/* <ProjectsPage /> */}
+    </main>
+  )
 }
