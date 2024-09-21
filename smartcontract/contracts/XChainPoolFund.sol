@@ -3,15 +3,26 @@ pragma solidity ^0.8.20;
 import {ByteHasher} from "./helpers/ByteHasher.sol";
 import {IWorldID} from "./interfaces/IWorldID.sol";
 
-contract PoolFund {
+import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
+import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
+import {IERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/utils/SafeERC20.sol";
+
+contract XChainPoolFund is CCIPReceiver {
     /// @dev This allows us to use our hashToField function on bytes
     using ByteHasher for bytes;
 
     /// @notice Thrown when attempting to reuse a nullifier
     error InvalidNullifier();
+       error UnauthorizedSender();
+    error IncorrectToken();
 
     /// @dev The address of the World ID Router contract that will be used for verifying proofs
     IWorldID internal immutable worldId;
+
+     IRouterClient public immutable ccipRouter;
+       address public immutable LINK_TOKEN; 
 
     /// @dev The keccak256 hash of the externalNullifier (unique identifier of the action performed), combination of appId and action
     uint256 internal immutable externalNullifierHash;
@@ -146,6 +157,7 @@ contract PoolFund {
     mapping(uint256 => mapping(uint256 => address[])) public bidAddresses; // poolId => cycle => list of bidder addresses
     mapping(uint256 => Transaction[]) public poolTransactions;
 
+
     // Events
     event PoolCreated(uint256 poolId, string name, address creator);
     event MemberJoined(uint256 poolId, address member);
@@ -175,19 +187,32 @@ contract PoolFund {
     );
     event PenaltyApplied(uint256 poolId, address member, uint256 amount);
 
+    event MessageSent(
+        bytes32 messageId,
+        uint64 targetChainId,
+        address receiver,
+        string message,
+        Client.EVMTokenAmount tokenAmount,
+        uint256 fees
+    );
+
     constructor(
         IWorldID _worldId,
         string memory _appId,
-        string memory _action
-    ) {
+        string memory _action,
+        address _ccipRouter,
+        address _linkToken
+    ) CCIPReceiver(_ccipRouter) {
         worldId = _worldId;
+         ccipRouter = IRouterClient(_ccipRouter);
+         LINK_TOKEN = _linkToken;
         externalNullifierHash = abi
             .encodePacked(abi.encodePacked(_appId).hashToField(), _action)
             .hashToField();
     }
 
     // Create a new pool with parameters grouped into a struct
-    function createPool(PoolParameters memory params) public {
+    function createPool(PoolParameters memory parwams) public {
         poolCounter++;
         Pool storage pool = pools[poolCounter];
         pool.poolId = poolCounter;
@@ -247,6 +272,73 @@ contract PoolFund {
         recordTransaction(txnInput);
 
         emit MemberJoined(_poolId, msg.sender);
+    }
+
+ // Modified to handle cross-chain deposits received via CCIP
+    function ccipReceive(Client.Any2EVMMessage memory any2EvmMessage) internal override {
+        bytes32 messageId = any2EvmMessage.messageId;
+        uint64 sourceChainSelector = any2EvmMessage.sourceChainSelector;
+        address sender = abi.decode(any2EvmMessage.sender, (address));
+        Client.EVMTokenAmount[] memory tokenAmounts = any2EvmMessage.destTokenAmounts;
+
+        // Expecting one token transfer per message, handle the first token amount
+        require(tokenAmounts.length > 0, "No token amount received");
+
+        address token = tokenAmounts[0].token;
+        uint256 amount = tokenAmounts[0].amount;
+
+        // Decode the message data to extract pool information
+        (uint256 poolId) = abi.decode(any2EvmMessage.data, (uint256));
+        Pool storage pool = pools[poolId];
+        require(pool.status == PoolStatus.Active, "Pool is not active");
+
+        // Ensure correct token is being used
+        require(token == LINK_TOKEN, "Incorrect token");
+
+        // Update the pool state with the received amount
+        pool.valueStored += amount;
+
+        emit ContributionMade(poolId, sender, amount, pool.currentCycle);
+    }
+
+    // Function to send a cross-chain deposit request using CCIP
+    function sendCrossChainDeposit(
+        uint256 _poolId,
+        address receiver,
+        uint64 targetChainId,
+        address token,
+        uint256 amount
+    ) external {
+        Pool storage pool = pools[_poolId];
+        require(pool.status == PoolStatus.Active, "Pool is not active");
+        require(token == LINK_TOKEN, "Incorrect token");
+
+        // Approve the CCIP Router to transfer the specified amount of tokens
+        IERC20(token).approve(address(ccipRouter), amount);
+
+        // Create the token transfer details
+
+            Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
+
+            Client.EVMTokenAmount memory tokenAmount = Client.EVMTokenAmount({token: token, amount: amount});
+        tokenAmounts[0] = tokenAmount;
+
+        // Create the message payload to send across chains
+        Client.EVM2AnyMessage memory evm2AnyMessage = Client.EVM2AnyMessage({
+            receiver: abi.encode(receiver),
+            data: abi.encode(_poolId),
+            tokenAmounts: tokenAmounts,
+            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 200_000})),
+            feeToken: address(0)
+        });
+
+        // Calculate fees required to send the message
+        uint256 fees = ccipRouter.getFee(targetChainId, evm2AnyMessage);
+
+        // Send the cross-chain message
+        bytes32 messageId = ccipRouter.ccipSend{value: fees}(targetChainId, evm2AnyMessage);
+
+        emit MessageSent(messageId, targetChainId, receiver, "Deposit Request", tokenAmount, fees);
     }
 
     // Make a contribution to the pool
@@ -407,7 +499,8 @@ contract PoolFund {
         require(bidders.length > 0, "No bids submitted");
 
         address winnerAddress = determineWinner(_poolId, cycle, bidders);
-
+        
+        // @abhishek winner determined here attest >>>>>
         processPayout(_poolId, winnerAddress, cycle);
 
         // Reset for next cycle
