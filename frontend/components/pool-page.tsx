@@ -1,14 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Clock, DollarSign, Users, Vote } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { Award, Clock } from "lucide-react"
+import { useEffect, useState } from 'react'
 
 // Mock data and functions (replace with actual data fetching and contract interactions)
 const mockPoolData = {
@@ -31,9 +36,14 @@ const mockPoolData = {
 }
 
 const mockBids = [
-  { id: 1, bidder: "0x1234...5678", amount: 150, votes: 3 },
-  { id: 2, bidder: "0x5678...9012", amount: 180, votes: 2 },
-  { id: 3, bidder: "0x9012...3456", amount: 120, votes: 1 },
+  { id: 1, bidder: "0x1234...5678", amount: 150, votes: 3, reason: "Home renovation" },
+  { id: 2, bidder: "0x5678...9012", amount: 180, votes: 2, reason: "Medical expenses" },
+  { id: 3, bidder: "0x9012...3456", amount: 120, votes: 1, reason: "Education fees" },
+]
+
+const mockLastWinners = [
+  { walletAddress: "0xabcd...ef01", amountWithdraw: 500, voteCount: 5, reason: "Business expansion", RepaymentPeriod: "6 months", PeriodicCycleNumber: 2, totalMembers: 10 },
+  { walletAddress: "0x2345...6789", amountWithdraw: 450, voteCount: 4, reason: "Debt consolidation", RepaymentPeriod: "5 months", PeriodicCycleNumber: 1, totalMembers: 10 },
 ]
 
 const mockUserData = {
@@ -108,6 +118,7 @@ function BidsList({ bids, onVote }) {
               <div>
                 <p className="font-medium">{formatAddress(bid.bidder)}</p>
                 <p className="text-sm text-muted-foreground">{bid.amount} ETH</p>
+                <p className="text-xs text-muted-foreground">{bid.reason}</p>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-sm">{bid.votes} votes</span>
@@ -204,6 +215,48 @@ function UserActions({ pool, user }) {
   )
 }
 
+function LastWinners({ winners }) {
+  return (
+    <Card className="mt-6">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Award className="mr-2" />
+          Last Winners
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-4">
+          {winners.map((winner, index) => (
+            <li key={index} className="border-b pb-4 last:border-b-0 last:pb-0">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="font-medium">{formatAddress(winner.walletAddress)}</p>
+                  <p className="text-sm text-muted-foreground">{winner.amountWithdraw} ETH</p>
+                </div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline" size="sm">Details</Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Votes: {winner.voteCount}</p>
+                      <p>Reason: {winner.reason}</p>
+                      <p>Repayment: {winner.RepaymentPeriod}</p>
+                      <p>Cycle: {winner.PeriodicCycleNumber}</p>
+                      <p>Total Members: {winner.totalMembers}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Progress value={(winner.voteCount / winner.totalMembers) * 100} className="h-2" />
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  )
+}
+
 function TimeRemaining({ deadline }) {
   const [timeLeft, setTimeLeft] = useState("")
 
@@ -211,7 +264,7 @@ function TimeRemaining({ deadline }) {
     const timer = setInterval(() => {
       const now = new Date().getTime()
       const distance = deadline - now
-      
+
       if (distance < 0) {
         clearInterval(timer)
         setTimeLeft("Expired")
@@ -220,7 +273,7 @@ function TimeRemaining({ deadline }) {
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
         const seconds = Math.floor((distance % (1000 * 60)) / 1000)
-        
+
         setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`)
       }
     }, 1000)
@@ -290,8 +343,9 @@ export function PoolPageComponent() {
           <UserActions pool={mockPoolData} user={mockUserData} />
           <UserStats user={mockUserData} />
         </div>
-        <div>
+        <div className="space-y-6">
           <BidsList bids={mockBids} onVote={handleVote} />
+          <LastWinners winners={mockLastWinners} />
         </div>
       </div>
     </div>
