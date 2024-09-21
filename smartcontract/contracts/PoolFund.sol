@@ -353,7 +353,7 @@ contract PoolFund {
         // Verify the WorldID proof
         require(
             verifyVoter(signal, root, nullifierhash, proof, _poolId, cycle),
-            "user already voted"
+            "User already voted or verification failed"
         );
 
         if (voteType) {
@@ -482,24 +482,6 @@ contract PoolFund {
         }
         return false;
     }
-
-
-    //  struct PoolParameters {
-    //     string name;
-    //     string title;
-    //     uint256 depositAmount;
-    //     bool isAnonymousVoting;
-    //     uint256 depositPeriodDays;
-    //     uint256 withdrawPeriodDays;
-    //     bool distributeRemainingCycle;
-    //     uint256 minBidAmount;
-    //     uint256 maxBidAmount;
-    //     uint256 commitmentDeposit;
-    //     uint256 penaltyRate;
-    //     uint256 bidSubmissionDeadline;
-    // }
-
-    // ["Test Pool 1","Test Pool Title 1",200000000000000,true,30,10,false,100000000000000,500000000000000,1000000000000000,5,7]
 
     // Resolve ties by selecting the lowest bid amount
     function resolveTie(
@@ -637,5 +619,168 @@ contract PoolFund {
         recordTransaction(txnInput);
 
         emit PenaltyApplied(_poolId, _memberAddress, _penaltyAmount);
+    }
+
+    // New function to get bid details for a specific pool and cycle
+    function getBidDetails(uint256 _poolId, uint256 _cycle)
+        public
+        view
+        returns (Bid memory)
+    {
+        // Check if the caller is a member of the pool
+        require(
+            poolMembers[_poolId][msg.sender].isActive,
+            "Not a member of the pool"
+        );
+
+        // Get the bid details
+        Bid storage bid = poolBids[_poolId][_cycle][msg.sender];
+
+        // Check if the bid exists
+        require(bid.exists, "No bid found for this cycle");
+
+        // Return the bid details
+        return bid;
+    }
+
+    // Function to get pool details
+    function getPoolDetails(uint256 _poolId)
+        public
+        view
+        returns (
+            uint256 poolId,
+            string memory name,
+            string memory title,
+            uint256 depositAmount,
+            bool isAnonymousVoting,
+            uint256 depositPeriodDays,
+            uint256 withdrawPeriodDays,
+            bool distributeRemainingCycle,
+            uint256 valueStored,
+            uint256 minBidAmount,
+            uint256 maxBidAmount,
+            uint256 commitmentDeposit,
+            uint256 penaltyRate,
+            uint256 memberCount,
+            uint256 bidSubmissionDeadline,
+            PoolStatus status,
+            uint256 createdAt,
+            uint256 updatedAt,
+            address[] memory members,
+            uint256 currentCycle
+        )
+    {
+        Pool storage pool = pools[_poolId];
+        return (
+            pool.poolId,
+            pool.name,
+            pool.title,
+            pool.depositAmount,
+            pool.isAnonymousVoting,
+            pool.depositPeriodDays,
+            pool.withdrawPeriodDays,
+            pool.distributeRemainingCycle,
+            pool.valueStored,
+            pool.minBidAmount,
+            pool.maxBidAmount,
+            pool.commitmentDeposit,
+            pool.penaltyRate,
+            pool.memberCount,
+            pool.bidSubmissionDeadline,
+            pool.status,
+            pool.createdAt,
+            pool.updatedAt,
+            pool.members,
+            pool.currentCycle
+        );
+    }
+
+    // Function to get member details
+    function getMemberDetails(uint256 _poolId, address _memberAddress)
+        public
+        view
+        returns (
+            address memberAddress,
+            uint256 totalContributions,
+            uint256 totalWinnings,
+            uint256 totalPenalties,
+            bool isActive
+        )
+    {
+        Member storage member = poolMembers[_poolId][_memberAddress];
+        return (
+            member.memberAddress,
+            member.totalContributions,
+            member.totalWinnings,
+            member.totalPenalties,
+            member.isActive
+        );
+    }
+
+    // Function to get transactions for a pool
+    function getPoolTransactions(uint256 _poolId)
+        public
+        view
+        returns (Transaction[] memory)
+    {
+        return poolTransactions[_poolId];
+    }
+
+    // Function to get a specific transaction by ID
+    function getTransaction(uint256 _poolId, uint256 _transactionId)
+        public
+        view
+        returns (Transaction memory)
+    {
+        Transaction[] storage transactions = poolTransactions[_poolId];
+        for (uint256 i = 0; i < transactions.length; i++) {
+            if (transactions[i].transactionId == _transactionId) {
+                return transactions[i];
+            }
+        }
+        revert("Transaction not found");
+    }
+
+    // Function to get all bids for a specific pool and cycle
+    function getAllBids(uint256 _poolId, uint256 _cycle)
+        public
+        view
+        returns (Bid[] memory)
+    {
+        address[] storage bidders = bidAddresses[_poolId][_cycle];
+        Bid[] memory bids = new Bid[](bidders.length);
+        for (uint256 i = 0; i < bidders.length; i++) {
+            bids[i] = poolBids[_poolId][_cycle][bidders[i]];
+        }
+        return bids;
+    }
+
+    // Function to get whether a member has contributed in a cycle
+    function hasMemberContributed(
+        uint256 _poolId,
+        uint256 _cycle,
+        address _memberAddress
+    ) public view returns (bool) {
+        return hasContributed[_poolId][_cycle][_memberAddress];
+    }
+
+    // Function to check if a member has voted in a cycle
+    function hasMemberVoted(
+        uint256 _poolId,
+        uint256 _cycle,
+        address _memberAddress
+    ) public view returns (bool) {
+        Pool storage pool = pools[_poolId];
+        return pool.hasVoted[_cycle][_memberAddress];
+    }
+
+    // Function to get the list of members in a pool
+    function getPoolMembers(uint256 _poolId)
+        public
+        view
+        returns (address[] memory)
+    {
+        Pool storage pool = pools[_poolId];
+        return pool.members;
     }
 }
