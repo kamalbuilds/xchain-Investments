@@ -1,31 +1,49 @@
-import { BlockchainProviderConnector } from "@1inch/fusion-sdk";
-import { ethers } from "ethers";
+import {EIP712TypedData} from '@1inch/limit-order-sdk'
+import {BlockchainProviderConnector} from './blockchain-provider'
+
+interface TransactionConfig {
+    data?: string
+    to?: string
+}
+
+export interface Web3Like {
+    eth: {
+        call(transactionConfig: TransactionConfig): Promise<string>
+    }
+    extend(extension: unknown): any
+}
+
+interface ExtendedWeb3 extends Web3Like {
+    signTypedDataV4(walletAddress: string, typedData: string): Promise<string>
+}
 
 export class Web3ProviderConnector implements BlockchainProviderConnector {
-  private provider: ethers.BrowserProvider;
+    constructor(protected readonly web3Provider: Web3Like) {}
 
-  constructor(web3Provider: any) {
-    this.provider = web3Provider;
-  }
-  
-  async signTypedData(walletAddress: string, typedData: any): Promise<string> {
-    const signer = await this.provider.getSigner(walletAddress);
-    const signature = await signer.provider.send("eth_signTypedData_v4", [
-      walletAddress,
-      JSON.stringify(typedData),
-    ]);
-    return signature;
-  }
+    signTypedData(
+        walletAddress: string,
+        typedData: EIP712TypedData
+    ): Promise<string> {
+        const extendedWeb3: ExtendedWeb3 = this.web3Provider.extend({
+            methods: [
+                {
+                    name: 'signTypedDataV4',
+                    call: 'eth_signTypedData_v4',
+                    params: 2
+                }
+            ]
+        })
 
-  async ethCall(contractAddress: string, callData: string): Promise<string> {
-    const result = await this.provider.call({
-      to: contractAddress,
-      data: callData,
-    });
-    return result;
-  }
+        return extendedWeb3.signTypedDataV4(
+            walletAddress,
+            JSON.stringify(typedData)
+        )
+    }
 
-  async getNetwork(): Promise<any> {
-    return this.provider.getNetwork();
-  }
+    ethCall(contractAddress: string, callData: string): Promise<string> {
+        return this.web3Provider.eth.call({
+            to: contractAddress,
+            data: callData
+        })
+    }
 }

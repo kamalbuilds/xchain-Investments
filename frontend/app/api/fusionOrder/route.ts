@@ -5,6 +5,7 @@ import { getWalletClient } from "@wagmi/core"
 import { BrowserProvider, randomBytes, solidityPackedKeccak256 } from "ethers"
 import { useWalletClient } from "wagmi"
 import Web3 from "web3"
+import { type BlockchainProviderConnector, FusionSDK } from "@1inch/fusion-sdk";
 
 import { BASE_URL } from "@/config/1inch.config"
 import { Web3ProviderConnector } from "@/config/customProvider"
@@ -32,13 +33,12 @@ export async function POST(req: NextRequest) {
     console.log(client, "client");
 
     // Ensure the client is a valid provider conforming to EIP-1193
-    const provider = new BrowserProvider(client, {
-      chainId: client.chain.id,
-      name: client.chain.name,
-    });
+    const provider = new Web3(client);
 
     // Creating Web3ProviderConnector with the validated provider
-    const blockchain = new Web3ProviderConnector(provider);
+
+    console.log(provider, "provider");
+    const blockchain = new Web3ProviderConnector(provider?.currentProvider);
 
     const makerPrivateKey = "0x123....";
     const makerAddress = "0x123....";
