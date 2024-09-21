@@ -30,7 +30,7 @@ const AttestationPage = () => {
   }, [])
 
   const client = new SignProtocolClient(SpMode.OnChain, {
-    chain: EvmChains.arbitrumSepolia,
+    chain: EvmChains.sepolia,
     // walletClient: walletclient
   });
 
@@ -42,14 +42,7 @@ const AttestationPage = () => {
   const handleCreateAttestation = async () => {
 
 
-    // const walletclient = await getWalletClientQueryKey(wagmiConfig)
     console.log("client", client, window.ethereum)
-
-
-    // const client = new SignProtocolClient(SpMode.OnChain, {
-    //   chain: EvmChains.arbitrumSepolia,
-    //   walletClient: walletclient
-    // });
 
 
     const data = {

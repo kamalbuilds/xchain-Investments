@@ -17,28 +17,6 @@ import { MainNav } from "./main-nav"
 
 export function SiteHeader() {
   // Mock function for proof verification, should be replaced with your server-side verification logic
-  const verifyProof = async (proof: ISuccessResult) => {
-    // Replace this with your actual server route to verify the proof
-    try {
-      const response = await fetch("/api/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ proof }),
-      })
-      console.log("Response:", response)
-
-      console.log("Proof:", proof)
-      if (!response.ok) {
-        throw new Error("Verification failed")
-      }
-
-      console.log("Proof verified successfully")
-    } catch (error) {
-      console.error("Error verifying proof:", error)
-    }
-  }
 
   // Handle success callback after successful verification
   const onSuccess = (data: any) => {
