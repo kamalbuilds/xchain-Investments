@@ -8,16 +8,18 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { XChainChitFundContract } from '@/config/PoolFundContract.config'
 import { getEthersProvider, wagmiConfig } from '@/config/wagmi.config'
+import { Bid, Pool } from '@/interfaces'
 import { PoolFundABI } from '@/lib/ABI'
-import { ethers, EtherSymbol } from 'ethers'
+import { ethers } from 'ethers'
 import { Clock } from "lucide-react"
 import { useEffect, useState } from 'react'
+import { useAccount } from "wagmi"
 
 function formatAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
-function PoolDetails({ pool }) {
+function PoolDetails({ pool }: { pool: Pool }) {
   return (
     <Card>
       <CardHeader>
@@ -64,7 +66,7 @@ function PoolDetails({ pool }) {
   )
 }
 
-function BidsList({ bids, onVote }) {
+function BidsList({ bids, onVote }: { bids: Bid[], onVote: Function}) {
   return (
     <Card>
       <CardHeader>
@@ -90,7 +92,7 @@ function BidsList({ bids, onVote }) {
   )
 }
 
-function UserActions({ pool, user }) {
+function UserActions({ pool }: { pool: Pool }) {
   const [depositAmount, setDepositAmount] = useState("")
   const [withdrawAmount, setWithdrawAmount] = useState("")
   const [bidAmount, setBidAmount] = useState("")
@@ -294,19 +296,19 @@ const PoolIdPage = ({ params }: { params: any }) => {
         const mappedBids = bidsResult.map((bid, index) => ({
           id: index,
           bidder: bid.bidder,
-          amount: EtherSymbol.formatEther(bid.bidAmount),
+          amount: ethers.formatEther(bid.bidAmount),
           votes: parseInt(bid.voteCount),
         }))
         setBids(mappedBids)
 
-        // Fetch user data (replace with actual user address)
-        const userAddress = "0xYourUserAddressHere"
-        const userResult = await contract.getMemberDetails(poolId, userAddress)
+        // TODO: Fetch address
+        const { address } = useAccount()
+        const userResult = await contract.getMemberDetails(poolId, address)
         const mappedUser = {
           address: userResult[0],
-          totalContributions: EtherSymbol.formatEther(userResult[1]),
-          totalWinnings: EtherSymbol.formatEther(userResult[2]),
-          totalPenalties: EtherSymbol.formatEther(userResult[3]),
+          totalContributions: ethers.formatEther(userResult[1]),
+          totalWinnings: ethers.formatEther(userResult[2]),
+          totalPenalties: ethers.formatEther(userResult[3]),
           isActive: userResult[4],
         }
         setUserData(mappedUser)

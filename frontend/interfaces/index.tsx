@@ -44,9 +44,10 @@ interface Member {
 
 // Interface for the Bid struct
 interface Bid {
-  bidAmount: BigNumber
+  amount: BigNumber
   bidder: string // Ethereum address
-  voteCount: BigNumber
+  votes: BigNumber
+  id: BigNumber
   exists: boolean
 }
 
@@ -184,6 +185,6 @@ interface PoolParameters {
 
 export { PoolStatus, TransactionStatus, TransactionType };
 export type {
-    Bid, Member, Pool, PoolParameters, Transaction,
-    TransactionInput
+  Bid, Member, Pool, PoolParameters, Transaction,
+  TransactionInput
 };
