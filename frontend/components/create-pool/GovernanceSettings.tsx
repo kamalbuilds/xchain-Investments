@@ -64,7 +64,7 @@ export function GovernanceSettings({
             id="distributeRemainingCycle"
             checked={poolParams.distributeRemainingCycle}
             onCheckedChange={(checked) => {
-              setPoolParams((prev) => ({
+              setPoolParams((prev: any) => ({
                 ...prev,
                 distributeRemainingCycle: checked,
               }))

@@ -25,7 +25,7 @@ export function AnonymitySettings({
             id="anonymous-voting"
             checked={poolParams.isAnonymousVoting}
             onCheckedChange={(checked) => {
-              setPoolParams((prev) => ({
+              setPoolParams((prev: any) => ({
                 ...prev,
                 isAnonymousVoting: checked,
               }))
