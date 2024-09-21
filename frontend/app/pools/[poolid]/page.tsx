@@ -2,11 +2,11 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -327,8 +327,6 @@ export function PoolPageComponent() {
           updatedAt: poolDetails[17],
           members: poolDetails[18],
           currentCycle: poolDetails[19],
-          hasVoted: {},
-          voters: {},
         };
         setPoolData(pool);
 
@@ -373,10 +371,6 @@ export function PoolPageComponent() {
 
     try {
       const provider = getEthersProvider(wagmiConfig);
-      if (!provider) {
-        console.error('Error getting provider');
-        return;
-      }
       const signer = provider.getSigner();
       const contract = new ethers.Contract(
         XChainChitFundContract,

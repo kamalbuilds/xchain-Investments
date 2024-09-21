@@ -1,17 +1,14 @@
-import React, { useState } from "react"
-import { ethers } from "ethers"
+import { BigNumberish, ethers } from "ethers"
+import { useState } from "react"
 
+import {
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog"
 import { XChainChitFundContract } from "@/config/PoolFundContract.config"
 import { getEthersSigner, wagmiConfig } from "@/config/wagmi.config"
 import { PoolFundABI } from "@/lib/ABI"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
@@ -26,7 +23,7 @@ const JoinModal = ({
   setOpen
 }: {
   amount?: any
-  poolId: number
+  poolId: number | BigNumberish
   poolName: string
   fetchPools: () => Promise<void>
   setOpen: (open: boolean) => void

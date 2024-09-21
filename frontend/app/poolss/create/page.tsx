@@ -1,14 +1,14 @@
 "use client"
 
-import React, { useState } from "react"
+import { useState } from "react"
 import { useAccount, useWriteContract } from "wagmi"
 
-import { XChainChitFundContract } from "@/config/PoolFundContract.config"
-import { PoolFundABI } from "@/lib/ABI"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { XChainChitFundContract } from "@/config/PoolFundContract.config"
+import { PoolFundABI } from "@/lib/ABI"
 import { ethers } from "ethers"
 
 const CreatePoolsPage = () => {
@@ -33,7 +33,7 @@ const CreatePoolsPage = () => {
     })
 
     // Handle input changes
-    const handleChange = (e) => {
+    const handleChange = (e: any) => {
         const { name, value, type, checked } = e.target
         console.log("name", name, value);
 
@@ -46,9 +46,10 @@ const CreatePoolsPage = () => {
 
 
     // Handle form submit
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: any) => {
         e.preventDefault();
         writeContract(
+            // @ts-ignore
             {
                 abi: PoolFundABI,
                 address: XChainChitFundContract,
@@ -71,10 +72,10 @@ const CreatePoolsPage = () => {
                 ],
             },
             {
-                onSuccess: (res) => {
+                onSuccess: (res: any) => {
                     console.log("Res", res)
                 },
-                onError: (err) => {
+                onError: (err: any) => {
                     console.log("Err", err)
                 },
             }

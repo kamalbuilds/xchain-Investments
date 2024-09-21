@@ -9,13 +9,13 @@ import {
 import { decodeAbiParameters } from "viem"
 import { useAccount } from "wagmi"
 
-import { ThemeToggle } from "@/components/theme-toggle"
-import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/config/site"
+import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-toggle"
+
 import { MainNav } from "./main-nav"
 
 export function SiteHeader() {
-
   // Mock function for proof verification, should be replaced with your server-side verification logic
   const verifyProof = async (proof: ISuccessResult) => {
     // Replace this with your actual server route to verify the proof
@@ -41,7 +41,7 @@ export function SiteHeader() {
   }
 
   // Handle success callback after successful verification
-  const onSuccess = ( data : any) => {
+  const onSuccess = (data: any) => {
     console.log("Verification successful:", data)
 
     const unpackedProof = decodeAbiParameters(
@@ -60,10 +60,10 @@ export function SiteHeader() {
   const { address } = useAccount()
 
   return (
-    <header className="sticky top-0 z-40 p-4 w-full border-b bg-background">
+    <header className="sticky top-0 z-40 w-full border-b bg-background p-4">
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
-          <nav className="hidden md:flex space-x-2">
+          <nav className="hidden space-x-2 md:flex">
             <MainNav items={siteConfig.mainNav} />
           </nav>
         </div>
@@ -74,10 +74,10 @@ export function SiteHeader() {
           <DynamicWidget />
 
           <IDKitWidget
-          // @ts-ignore
-                app_id={process.env.NEXT_PUBLIC_APP_ID || "app_undefined"}
-                action={process.env.NEXT_PUBLIC_ACTION_ID || "verify"}
-                signal={address}
+            // @ts-ignore
+            app_id={process.env.NEXT_PUBLIC_APP_ID || "app_undefined"}
+            action={process.env.NEXT_PUBLIC_ACTION_ID || "verify"}
+            signal={address}
             verification_level={VerificationLevel.Orb}
             onSuccess={onSuccess}
           >

@@ -1,4 +1,3 @@
-import React from "react"
 
 import PoolCard from "@/components/pools/PoolCard"
 
@@ -15,7 +14,7 @@ const PoolsPage = () => {
     },
     {
       title: "Decentralized Governance",
-      description: "Projects are governed by their community through DAOs",
+      description: "Pools are governed by their community through DAOs",
     },
   ]
 
