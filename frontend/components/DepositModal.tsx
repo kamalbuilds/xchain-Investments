@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { ethers } from "ethers"
-import { useAccount } from "wagmi"
+import { useAccount, useWalletClient } from "wagmi"
 
 import {
     baseTokens,
@@ -47,8 +47,14 @@ const DepositModal = ({
     const [destinationChain, setDestinationChain] = useState<string>("")
     const [destinationToken, setDestinationToken] = useState<string>("")
 
+    const { data: client } = useWalletClient()
+
+
+
     const handleDeposit = async () => {
         try {
+            console.log("client", client);
+
             const sourceTokenData = selectedSourceTokens.find(
                 (token) => token.token === sourceToken
             )
@@ -74,6 +80,7 @@ const DepositModal = ({
                     dstTokenAddress: destinationTokenData.tokenAddress,
                     amount: tokenAmount,
                     walletAddress: address,
+                    client,
                 }),
             })
 
