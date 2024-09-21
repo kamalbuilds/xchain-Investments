@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { ethers } from "ethers"
 import { useAccount, useWalletClient } from "wagmi"
 
@@ -29,6 +29,7 @@ import {
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
+import Web3 from "web3"
 
 const DepositModal = ({
     poolId,
@@ -37,6 +38,12 @@ const DepositModal = ({
     poolId: number
     poolName: string
 }) => {
+    
+    useEffect(() => {
+        const pvd = new Web3(window.ethereum);
+        setPvd(pvd);
+    } , [])
+
     const { address } = useAccount()
     const [depositAmount, setDepositAmount] = useState<string>("")
     const [amountout, setAmountOut] = useState<string>("")
@@ -46,7 +53,7 @@ const DepositModal = ({
 
     const [destinationChain, setDestinationChain] = useState<string>("")
     const [destinationToken, setDestinationToken] = useState<string>("")
-
+    const [pvd , setPvd]= useState<Web3>();
     const { data: client } = useWalletClient()
 
 
@@ -81,6 +88,7 @@ const DepositModal = ({
                     amount: tokenAmount,
                     walletAddress: address,
                     client,
+                    pvd
                 }),
             })
 
