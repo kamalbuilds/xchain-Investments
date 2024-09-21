@@ -1,46 +1,31 @@
-import { signTypedData, call } from '@wagmi/core';
+import { BlockchainProviderConnector } from "@1inch/fusion-sdk";
+import { ethers } from "ethers";
 
-interface EIP712TypedData {
-  domain: any;
-  types: any;
-  primaryType: string;
-  message: any;
-}
+export class Web3ProviderConnector implements BlockchainProviderConnector {
+  private provider: ethers.BrowserProvider;
 
-interface BlockchainProviderConnector {
-  signTypedData(
-    walletAddress: string,
-    typedData: EIP712TypedData
-  ): Promise<string>;
-
-  ethCall(contractAddress: string, callData: string): Promise<string>;
-}
-
-export class WagmiConnectorProvider implements BlockchainProviderConnector {
-  private config: any;
-
-  constructor(config: any) {
-    this.config = config;
+  constructor(web3Provider: any) {
+    this.provider = web3Provider;
   }
-
-  async signTypedData(
-    walletAddress: string,
-    typedData: EIP712TypedData
-  ): Promise<string> {
-    const result = await signTypedData(this.config, {
-      domain: typedData.domain,
-      types: typedData.types,
-      primaryType: typedData.primaryType,
-      message: typedData.message,
-    });
-    return result;
+  
+  async signTypedData(walletAddress: string, typedData: any): Promise<string> {
+    const signer = await this.provider.getSigner(walletAddress);
+    const signature = await signer.provider.send("eth_signTypedData_v4", [
+      walletAddress,
+      JSON.stringify(typedData),
+    ]);
+    return signature;
   }
 
   async ethCall(contractAddress: string, callData: string): Promise<string> {
-    const result = await call(this.config, {
+    const result = await this.provider.call({
       to: contractAddress,
       data: callData,
     });
     return result;
+  }
+
+  async getNetwork(): Promise<any> {
+    return this.provider.getNetwork();
   }
 }

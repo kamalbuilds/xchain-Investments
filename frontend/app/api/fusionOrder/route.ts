@@ -6,7 +6,8 @@ import { randomBytes, solidityPackedKeccak256 } from "ethers"
 import { BASE_URL } from "@/config/1inch.config"
 import Web3 from "web3";
 import { getEthersProvider, getEthersSigner, wagmiConfig } from "@/config/wagmi.config";
-import { WagmiConnectorProvider } from "@/config/customProvider"
+import { Web3ProviderConnector } from "@/config/customProvider"
+import { useWalletClient } from "wagmi"
 
 function getRandomBytes32(): string {
   return uint8ArrayToHex(randomBytes(32))
@@ -23,7 +24,18 @@ export async function POST(req: NextRequest) {
       walletAddress,
     } = await req.json();
 
-    const blockchain = new WagmiConnectorProvider(wagmiConfig);
+    const { data: client } = useWalletClient();
+
+    console.log(client, "client");
+
+    const blockchain = new Web3ProviderConnector(
+       // @ts-ignore
+       new BrowserProvider(client.transport, {
+        chainId: client.chain.id,
+        name: client.chain.name,
+        ensAddress: client.chain.contracts?.ensRegistry?.address,
+      }),
+    );
 
     // const sourceChain = 1
     // const destinationChain = 137

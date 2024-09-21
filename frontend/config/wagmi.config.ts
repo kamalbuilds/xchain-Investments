@@ -21,6 +21,40 @@ import {
   sepolia,
 } from "viem/chains"
 import { createConfig } from "wagmi"
+import { Web3ProviderConnector } from "./customProvider"
+
+const customProviderConfig = {
+  autoConnect: true, // Automatically connect to the last connected wallet
+  chains: [
+    {
+      id: 1, // Ethereum Mainnet
+      name: 'Ethereum Mainnet',
+      network: 'mainnet',
+      rpcUrls: {
+        default: 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID', // Replace with your Infura project ID or another RPC URL
+      },
+      nativeCurrency: {
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18,
+      },
+    },
+    {
+      id: 137, // Polygon Mainnet
+      name: 'Polygon Mainnet',
+      network: 'polygon',
+      rpcUrls: {
+        default: 'https://polygon-rpc.com/', // Public RPC URL for Polygon Mainnet
+      },
+      nativeCurrency: {
+        name: 'MATIC',
+        symbol: 'MATIC',
+        decimals: 18,
+      },
+      blockExplorerUrl: 'https://polygonscan.com/', // Block explorer for Polygon Mainnet
+    },
+  ],
+};
 
 export const wagmiConfig = createConfig({
   chains: [mainnet, optimism, base, polygon, sepolia, baseSepolia],
