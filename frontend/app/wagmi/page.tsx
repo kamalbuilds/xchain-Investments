@@ -137,8 +137,6 @@ export default function Home() {
       <FusionSwap />
 
       <HomePageComponent />
-
-      {/* <ProjectsPage /> */}
     </main>
   )
 }

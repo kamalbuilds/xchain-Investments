@@ -1,15 +1,22 @@
 "use client"
 
-import React from "react"
+import React from "react";
 
-import ProjectCard from "./ProjectCard"
+import PoolCard from "@/components/PoolCard";
 
-const PoolList: React.FC<any> = ({ pools, fetchPools }) => {
-  const filteredProjects = pools.filter((pool) => pool.poolId !== 0)
+import { Pool } from "@/interfaces";
+
+interface PoolListProps {
+  pools: Pool[];
+  fetchPools: () => Promise<void>;
+}
+
+const PoolList: React.FC<PoolListProps> = ({ pools, fetchPools }) => {
+  const filteredPools: Pool[] = pools.filter((pool) => pool.poolId !== 0)
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {filteredProjects.map((pool) => (
-        <ProjectCard key={pool.id} pool={pool} fetchPools={fetchPools} />
+      {filteredPools.map((pool) => (
+        <PoolCard key={pool.poolId} pool={pool} fetchPools={fetchPools} />
       ))}
     </div>
   )

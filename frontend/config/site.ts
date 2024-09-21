@@ -3,7 +3,7 @@ export type SiteConfig = typeof siteConfig
 export const siteConfig = {
   name: "XChainPools",
   description:
-    "XChainPools empowers projects through decentralized funding, anonymous voting, and community governance. Join a collective, invest in impactful projects, and be part of a revolution in transparent and democratic funding.",
+    "XChainPools empowers pools through decentralized funding, anonymous voting, and community governance. Join a collective, invest in impactful pools, and be part of a revolution in transparent and democratic funding.",
   mainNav: [
     {
       title: "Home",
