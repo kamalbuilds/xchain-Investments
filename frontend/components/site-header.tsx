@@ -44,7 +44,7 @@ export function SiteHeader() {
   }
 
   // Handle success callback after successful verification
-  const onSuccess = (data) => {
+  const onSuccess = ( data : any) => {
     console.log("Verification successful:", data)
 
     const unpackedProof = decodeAbiParameters(
