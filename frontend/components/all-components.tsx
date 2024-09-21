@@ -68,15 +68,6 @@ export function Footer() {
   )
 }
 
-// components/Card.tsx
-export function Card({ children, className, ...props }) {
-  return (
-    <Card className={`overflow-hidden ${className}`} {...props}>
-      {children}
-    </Card>
-  )
-}
-
 // components/Button.tsx
 export function CustomButton({ children, variant = "default", size = "default", className, ...props }) {
   return (
@@ -244,7 +235,7 @@ export function TestimonialSection() {
                     <p className="text-sm text-muted-foreground">{testimonial.role}</p>
                   </div>
                 </div>
-                <p className="italic">"{testimonial.quote}"</p>
+                <p className="italic">&quot;{testimonial.quote}&quot;</p>
               </CardContent>
             </Card>
           ))}
