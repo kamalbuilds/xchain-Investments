@@ -1,18 +1,18 @@
 "use client"
 
-import { useState } from "react"
 import { ethers } from "ethers"
+import { useState } from "react"
 import { useWriteContract } from "wagmi"
 
-import { XChainChitFundContract } from "@/config/PoolFundContract.config"
-import { PoolFundABI } from "@/lib/ABI"
 import { Button } from "@/components/ui/button"
 import { FormField } from "@/components/ui/form-field"
+import { XChainChitFundContract } from "@/config/PoolFundContract.config"
+import { PoolFundABI } from "@/lib/ABI"
 
 import { AnonymitySettings } from "./AnonymitySettings"
 import { GovernanceSettings } from "./GovernanceSettings"
 
-export function ProjectForm() {
+export function PoolForm() {
   const [poolParams, setPoolParams] = useState({
     name: "",
     title: "",
@@ -29,8 +29,9 @@ export function ProjectForm() {
   })
 
   // Handle input changes
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target
+    console.log("name", name, value)
 
     setPoolParams((prev) => ({
       ...prev,
@@ -38,10 +39,12 @@ export function ProjectForm() {
     }))
   }
 
-  const { writeContract, isPending } = useWriteContract()
+  const { writeContract } = useWriteContract()
 
   const handleCreatePool = async (value: any) => {
+    console.log("value", value)
     writeContract(
+      // @ts-ignore
       {
         abi: PoolFundABI,
         address: XChainChitFundContract,
@@ -64,10 +67,10 @@ export function ProjectForm() {
         ],
       },
       {
-        onSuccess: (res) => {
+        onSuccess: (res: any) => {
           console.log("Res", res)
         },
-        onError: (err) => {
+        onError: (err: any) => {
           console.log("Err", err)
         },
       }
@@ -78,18 +81,18 @@ export function ProjectForm() {
     <div>
       <div className="space-y-6">
         <FormField
-          label="Project Title"
-          id="project-title"
-          placeholder="Enter project title"
+          label="Pool Title"
+          id="pool-title"
+          placeholder="Enter pool title"
           name="name"
           value={poolParams.name}
           onChange={handleChange}
         />
         <FormField
-          label="Project Description"
-          id="project-description"
+          label="Pool Description"
+          id="pool-description"
           type="textarea"
-          placeholder="Describe your project"
+          placeholder="Describe your pool"
           name="title"
           value={poolParams.title}
           onChange={handleChange}
@@ -113,8 +116,8 @@ export function ProjectForm() {
           setPoolParams={setPoolParams}
           handleChange={handleChange}
         />
-        <Button type="submit" className="w-full" onClick={handleCreatePool} disabled={isPending}>
-          {isPending ? 'Creating...' : 'Create Project'}
+        <Button type="submit" className="w-full" onClick={handleCreatePool}>
+          Create Pool
         </Button>
       </div>
     </div>
