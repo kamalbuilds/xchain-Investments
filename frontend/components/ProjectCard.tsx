@@ -1,78 +1,151 @@
-'use client'
+"use client"
 
-import React from 'react'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import React from "react"
+import { ExternalLink } from "lucide-react"
+
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+import DepositModal from "./DepositModal"
+import JoinModal from "./JoinModal"
 
 interface Project {
-  id: number;
-  title: string;
-  description: string;
-  goal: number;
-  raised: number;
-  anonymous: boolean;
-  monthlyDeposit?: number;
-  totalMonths?: number;
-  currentMonth?: number;
+  id: number
+  title: string
+  description: string
+  goal: number
+  raised: number
+  anonymous: boolean
+  monthlyDeposit?: number
+  totalMonths?: number
+  currentMonth?: number
 }
 
 interface ProjectCardProps {
-  project: Project;
+  project: Project
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
-  const progressPercentage = project.totalMonths && project.currentMonth
-    ? (project.currentMonth / project.totalMonths) * 100
-    : (project.raised / project.goal) * 100;
-
-  const remainingMonths = project.totalMonths && project.currentMonth
-    ? project.totalMonths - project.currentMonth
-    : null;
-
+const ProjectCard: React.FC<ProjectCardProps> = ({ pool }) => {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">{project.title}</CardTitle>
+        <CardTitle className="text-xl font-bold flex flex-row justify-between">
+          <div className="flex gap-2">
+            <p>{pool.name}</p>
+            <ExternalLink />
+          </div>
+          <Badge variant={pool.isAnonymousVoting ? "secondary" : "outline"}>
+            {pool.isAnonymousVoting ? "Anonymous" : "Public"}
+          </Badge>
+        </CardTitle>
+        <CardDescription>{pool.title}</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-4">{project.description}</p>
         <div className="space-y-4">
           <div>
-            <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Progress</span>
-              {project.totalMonths && project.currentMonth ? (
-                <span className="text-sm font-medium">{project.currentMonth} / {project.totalMonths} months</span>
-              ) : (
-                <span className="text-sm font-medium">{Math.round(progressPercentage)}%</span>
-              )}
+            <div>
+              <div className="flex flex-row justify-between">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  Member Count
+                </p>
+                <p className="leading-7 ">{pool.memberCount}</p>
+              </div>
+
+              <div className="flex flex-row justify-between">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  Value stored
+                </p>
+                <p className="leading-7 ">{pool.valueStored}</p>
+              </div>
+
+              <div className="flex flex-row justify-between">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  Commitment Deposit
+                </p>
+                <p className="leading-7 ">{pool.commitmentDeposit}</p>
+              </div>
+
+              <div className="flex flex-row justify-between">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  Deposit Amount
+                </p>
+                <p className="leading-7 ">{pool.depositAmount} </p>
+              </div>
+
+              <div className="flex flex-row justify-between">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  Deposit Range
+                </p>
+                <p className="leading-7 ">
+                  {pool.minBidAmount} - {pool.maxBidAmount}
+                </p>
+              </div>
+
+              <div className="flex flex-row justify-between">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  Penalty Rate
+                </p>
+                <p className="leading-7 ">{pool.penaltyRate}</p>
+              </div>
+
+              <div className="flex flex-row justify-between">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  Deposit Period (Days)
+                </p>
+                <p className="leading-7 ">{pool.depositPeriodDays}</p>
+              </div>
+
+              <div className="flex flex-row justify-between">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  Withdraw Period (Days)
+                </p>
+                <p className="leading-7 ">{pool.withdrawPeriodDays}</p>
+              </div>
             </div>
-            <Progress value={progressPercentage} className="h-2" />
           </div>
-          {project.monthlyDeposit && (
-            <div className="flex justify-between text-sm">
-              <span>Monthly Deposit</span>
-              <span className="font-semibold">${project.monthlyDeposit.toLocaleString()}</span>
-            </div>
-          )}
-          <div className="flex justify-between text-sm">
-            <span>Total Raised</span>
-            <span className="font-semibold">${project.raised.toLocaleString()} / ${project.goal.toLocaleString()}</span>
-          </div>
-          {remainingMonths !== null && (
-            <div className="flex justify-between text-sm">
-              <span>Remaining</span>
-              <span className="font-semibold">{remainingMonths} {remainingMonths === 1 ? 'month' : 'months'}</span>
-            </div>
-          )}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Badge variant={project.anonymous ? "secondary" : "outline"}>
-          {project.anonymous ? "Anonymous" : "Public"}
-        </Badge>
-        <Button>Donate</Button>
+      <CardFooter className="flex flex-col gap-4 ">
+        <Button className="w-full">Submit Bid</Button>
+        <div className="flex w-full flex-row gap-2">
+          <Dialog>
+            <DialogTrigger>
+              <Button className="w-full">Deposit</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DepositModal poolId={pool.poolId} poolName={pool.name} />
+            </DialogContent>
+          </Dialog>
+
+          <Dialog>
+            <DialogTrigger>
+              <Button className="w-full">Join</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <JoinModal
+                poolId={pool.poolId}
+                amount={pool.commitmentDeposit}
+                poolName={pool.name}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardFooter>
     </Card>
   )

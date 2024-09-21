@@ -10,12 +10,12 @@ export const siteConfig = {
       href: "/",
     },
     {
-      title: "Explore",
-      href: "/projects",
+      title: "Pools",
+      href: "/pools",
     },
     {
-      title: "Create Project",
-      href: "/create-project",
+      title: "Create Pool",
+      href: "/create-pool",
     },
     {
       title: "Dashboard",
