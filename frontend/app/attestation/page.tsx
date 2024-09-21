@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 const AttestationPage = () => {
   const [address, setAddress] = useState<string | null>(null);
 
-    const walletclient = useWalletClient();
+  const walletclient = useWalletClient();
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -31,11 +31,11 @@ const AttestationPage = () => {
 
   const client = new SignProtocolClient(SpMode.OnChain, {
     chain: EvmChains.arbitrumSepolia,
-    walletClient: walletclient
+    // walletClient: walletclient
   });
 
   const handleGetSchema = async () => {
-    const res = await client.getSchema("0xf4")
+    const res = await client.getSchema("0x27b")
     console.log("Res", res)
   }
 
@@ -46,19 +46,24 @@ const AttestationPage = () => {
     console.log("client", client, window.ethereum)
 
 
-  // const client = new SignProtocolClient(SpMode.OnChain, {
-  //   chain: EvmChains.arbitrumSepolia,
-  //   walletClient: walletclient
-  // });
+    // const client = new SignProtocolClient(SpMode.OnChain, {
+    //   chain: EvmChains.arbitrumSepolia,
+    //   walletClient: walletclient
+    // });
 
 
     const data = {
-      name: "Abhishek",
+      poolId: 1,
+      walletAddress: address,
+      cycle: 1,
+      reason: 'Healthcare',
+      totalMembers: 5,
+
     }
     try {
       const response = await client.createAttestation({
-        schemaId: "0xf4",
-        data: { name: "Abhishek" },
+        schemaId: "0x27b",
+        data,
         indexingValue: "1234",
       })
       console.log("response", response)

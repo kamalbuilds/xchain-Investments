@@ -12,7 +12,8 @@ import { getEthersProvider, getEthersSigner, wagmiConfig } from '@/config/wagmi.
 import { toast } from "@/hooks/use-toast"
 import { Bid, Pool } from '@/interfaces'
 import { PoolFundABI } from '@/lib/ABI'
-import { ethers } from 'ethers'
+import { EvmChains, SignProtocolClient, SpMode } from "@ethsign/sp-sdk"
+import { ethers, parseEther, parseUnits, toBeHex, zeroPadValue } from 'ethers'
 import { Clock } from "lucide-react"
 import { useEffect, useState } from 'react'
 import { decodeAbiParameters } from "viem"
@@ -101,10 +102,36 @@ function UserActions({ pool }: { pool: Pool }) {
   const [depositAmount, setDepositAmount] = useState("")
   const [withdrawAmount, setWithdrawAmount] = useState("")
   const [bidAmount, setBidAmount] = useState("")
+  const [reasonresponse, setReasonResponse] = useState('')
 
-  const handleDeposit = () => {
-    // Implement deposit logic
-    console.log("Depositing", depositAmount)
+  const handleDeposit = async () => {
+    try {
+      // Implement deposit logic
+      console.log("Depositing", depositAmount)
+
+      const amount = parseEther(depositAmount)
+
+      const signer = await getEthersSigner(wagmiConfig)
+
+      const contract = new ethers.Contract(
+        XChainChitFundContract,
+        PoolFundABI,
+        signer
+      )
+
+      const tx = await contract.contribute(pool.poolId, {
+        value: ethers.parseEther(pool.depositAmount.toString()), // Convert ETH to wei
+      })
+
+      console.log("Tx>>>", tx);
+      toast({
+        title: 'Successfully created Bid'
+      })
+    } catch (error) {
+      console.log("Error", error);
+
+    }
+
   }
 
   const handleWithdraw = () => {
@@ -112,9 +139,34 @@ function UserActions({ pool }: { pool: Pool }) {
     console.log("Withdrawing", withdrawAmount)
   }
 
-  const handleBid = () => {
-    // Implement bid logic
-    console.log("Bidding", bidAmount)
+  const handleBid = async () => {
+    try {
+      // Implement bid logic
+      console.log("Bidding", bidAmount)
+      const amount = parseEther(bidAmount)
+
+      const signer = await getEthersSigner(wagmiConfig)
+
+      const contract = new ethers.Contract(
+        XChainChitFundContract,
+        PoolFundABI,
+        signer
+      )
+      const res = await contract.submitBid(pool.poolId, amount)
+      console.log("Res", res);
+      toast({
+        title: 'Successfully created Bid'
+      })
+
+    } catch (error) {
+      console.log("error", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error in creating Bid'
+      })
+    }
+
+
   }
 
   return (
@@ -123,11 +175,11 @@ function UserActions({ pool }: { pool: Pool }) {
         <CardTitle>Your Actions</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="deposit">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="deposit">Deposit</TabsTrigger>
-            <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
+        <Tabs defaultValue="bid">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="bid">Bid</TabsTrigger>
+            <TabsTrigger value="deposit">Deposit</TabsTrigger>
+
           </TabsList>
           <TabsContent value="deposit">
             <div className="space-y-4">
@@ -137,26 +189,11 @@ function UserActions({ pool }: { pool: Pool }) {
                   id="depositAmount"
                   placeholder="0.00"
                   type="number"
-                  value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
+                  readOnly
+                  value={pool.depositAmount.toString()}
                 />
               </div>
               <Button onClick={handleDeposit} className="w-full">Deposit</Button>
-            </div>
-          </TabsContent>
-          <TabsContent value="withdraw">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="withdrawAmount">Amount to Withdraw</Label>
-                <Input
-                  id="withdrawAmount"
-                  placeholder="0.00"
-                  type="number"
-                  value={withdrawAmount}
-                  onChange={(e) => setWithdrawAmount(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleWithdraw} className="w-full">Withdraw</Button>
             </div>
           </TabsContent>
           <TabsContent value="bid">
@@ -169,6 +206,16 @@ function UserActions({ pool }: { pool: Pool }) {
                   type="number"
                   value={bidAmount}
                   onChange={(e) => setBidAmount(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="requirement">Requirement</Label>
+                <Input
+                  id="requirement"
+                  placeholder="Enter why you need money?"
+                  type="text"
+                  value={reasonresponse}
+                  onChange={(e) => setReasonResponse(e.target.value)}
                 />
               </div>
               <Button onClick={handleBid} className="w-full">Submit Bid</Button>
@@ -390,9 +437,80 @@ const PoolIdPage = ({ params }: { params: any }) => {
             <div>
               <BidsList bids={bids} onVote={handleVote} />
             </div>
+            <div>
+              <GenerateAttestationPage pool={poolData} />
+            </div>
           </div>
         </div>
       )}
+    </div>
+  )
+
+
+}
+
+const GenerateAttestationPage = ({ pool }: { pool: Pool }) => {
+
+  const { address } = useAccount();
+  const client = new SignProtocolClient(SpMode.OnChain, {
+    chain: EvmChains.baseSepolia,
+  });
+
+  console.log("Pool", pool);
+
+
+  const handleGetSchema = async () => {
+    const res = await client.getSchema("0x2f7");
+    console.log("Res", res);
+  }
+
+  const handleCreateAttestation = async () => {
+    const provider = await getEthersProvider(wagmiConfig)
+    // Ensure this function returns a valid ethers provider
+    const contract = new ethers.Contract(
+      XChainChitFundContract,
+      PoolFundABI,
+      provider
+    )
+
+    const totalMembers = await contract.getPoolMembers(pool.poolId)
+    console.log('totalMembers', totalMembers)
+
+    const response = await contract.poolBids(pool.poolId, pool.currentCycle, address)
+    console.log('response', response)
+
+    if (response[2] > 0) {
+      const attestationData = {
+        walletAddress: response[1],
+        amountWithdraw: response[0],
+        voteCount: zeroPadValue(toBeHex(response[2]), 32),
+        reason: '',
+        PeriodicCycleNumber: pool.currentCycle,
+        totalMembers: totalMembers.length,
+        RepaymentPeriod: 0,
+      }
+
+      console.log("attestationData", attestationData);
+
+      const res = await client.createAttestation({
+        schemaId: "0x2f7",
+        data: attestationData,
+        indexingValue: "xxx",
+      });
+
+      console.log("res", res);
+
+    }
+
+
+  }
+
+
+  return (
+    <div>
+      <div>hey there</div>
+      <Button onClick={handleGetSchema}>Get schema</Button>
+      <Button onClick={handleCreateAttestation}>Create Attestation</Button>
     </div>
   )
 }

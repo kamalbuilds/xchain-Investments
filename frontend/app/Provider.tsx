@@ -16,11 +16,11 @@ const queryClient = new QueryClient()
 
 const Provider = ({ children }: { children: ReactNode }) => {
 
-  
+
   return (
     <DynamicContextProvider
       settings={{
-        environmentId: "8b440de3-16a6-46d2-a84b-91d64c40629e",
+        environmentId: "59fe38c9-daaf-450b-862b-1e7d83b1d90d",
         walletConnectors: [EthereumWalletConnectors],
       }}
     >

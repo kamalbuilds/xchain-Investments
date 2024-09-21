@@ -1,4 +1,4 @@
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.26;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
@@ -37,12 +37,12 @@ interface IWorldID {
 
 contract PoolFund is ISPHook {
     using ByteHasher for bytes;
-
+    ISP private s_baseIspContract;
     IWorldID internal immutable worldId;
     uint256 internal immutable externalNullifier;
 
     address public ispContractAddress =
-        0x4e4af2a21ebf62850fD99Eb6253E1eFBb56098cD;
+        0x878c92FD89d8E0B93Dc0a3c907A2adc7577e39c5; //sepolia
 
     error UnsupportedOperation();
 
@@ -386,8 +386,6 @@ contract PoolFund is ISPHook {
 
         pool.hasVoted[cycle][msg.sender] = true;
         pool.voters[cycle].push(nullifierhash);
-
-        emit VoteCast(_poolId, pollId, voteType);
     }
 
     // Finalize the cycle and determine the winning bid
@@ -618,26 +616,31 @@ contract PoolFund is ISPHook {
         emit PenaltyApplied(_poolId, _memberAddress, _penaltyAmount);
     }
 
-    /**
-     * Sign Protocol attestation logic
-     * @param address of the attester
-     * @param schemaId of the schema that is created from sign platform
-     * @param attestationId
-     * @param null
-     */
     function didReceiveAttestation(
         address, // attester
         uint64, // schemaId
         uint64 attestationId,
         bytes calldata // extraData
     ) external payable {
-        // Attestation memory attestation = ISP(_msgSender()).getAttestation(attestationId);
-        bytes memory attestationData = fetchAttestationData(attestationId);
+        s_baseIspContract = ISP(ispContractAddress);
+        Attestation memory attestationInfo = s_baseIspContract.getAttestation(
+            attestationId
+        );
 
-        //TODO: @kamal to do this
+        (
+            uint256 poolId,
+            address walletAddress,
+            uint256 cycle,
+            string memory reason,
+            uint256 totalMembers
+        ) = abi.decode(
+                attestationInfo.data,
+                (uint256, address, uint256, string, uint256)
+            );
+
+        processPayout(poolId, walletAddress, cycle);
         // attestation data will have the address of the user that is receiving the amount and we can extract it from here
         // extract address from the attesation data and then send the money to the address.
-        // _checkThreshold(abi.decode(attestation.data, (uint256)));
     }
 
     function didReceiveAttestation(
@@ -669,20 +672,5 @@ contract PoolFund is ISPHook {
         bytes calldata // extraData
     ) external pure {
         revert UnsupportedOperation();
-    }
-
-    // Function to call the ISP contract's getAttestation function and return only the data field
-    function fetchAttestationData(
-        uint64 attestationId
-    ) public view returns (bytes memory) {
-        // Create an instance of the ISP interface
-        ISPInterface ispContract = ISPInterface(ispContractAddress);
-
-        // Call the getAttestation function and retrieve the full attestation
-        ISPInterface.Attestation memory attestation = ispContract
-            .getAttestation(attestationId);
-
-        // Return only the data field of the attestation
-        return attestation.data;
     }
 }
