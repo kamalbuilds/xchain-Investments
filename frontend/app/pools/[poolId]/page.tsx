@@ -6,13 +6,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import WorldcoinVerification from "@/components/worldcoin/WorldcoinVerification"
 import { XChainChitFundContract } from '@/config/PoolFundContract.config'
-import { getEthersProvider, wagmiConfig } from '@/config/wagmi.config'
+import { getEthersProvider, getEthersSigner, wagmiConfig } from '@/config/wagmi.config'
+import { toast } from "@/hooks/use-toast"
 import { Bid, Pool } from '@/interfaces'
 import { PoolFundABI } from '@/lib/ABI'
 import { ethers } from 'ethers'
 import { Clock } from "lucide-react"
 import { useEffect, useState } from 'react'
+import { decodeAbiParameters } from "viem"
 import { useAccount } from "wagmi"
 
 function formatAddress(address: string) {
@@ -66,7 +69,7 @@ function PoolDetails({ pool }: { pool: Pool }) {
   )
 }
 
-function BidsList({ bids, onVote }: { bids: Bid[], onVote: Function}) {
+function BidsList({ bids, onVote }: { bids: Bid[], onVote: Function }) {
   return (
     <Card>
       <CardHeader>
@@ -82,7 +85,9 @@ function BidsList({ bids, onVote }: { bids: Bid[], onVote: Function}) {
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-sm">{bid.votes} votes</span>
-                <Button size="sm" onClick={() => onVote(bid.id)}>Vote</Button>
+                <WorldcoinVerification title='Vote In' onSuccess={(data) => {
+                  onVote(bid.id, data)
+                }} />
               </div>
             </li>
           ))}
@@ -251,6 +256,8 @@ const PoolIdPage = ({ params }: { params: any }) => {
   const [userData, setUserData] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
 
+  const { address } = useAccount();
+
   const getPoolData = async (poolId: number) => {
     if (poolId) {
       try {
@@ -301,8 +308,7 @@ const PoolIdPage = ({ params }: { params: any }) => {
         }))
         setBids(mappedBids)
 
-        // TODO: Fetch address
-        const { address } = useAccount()
+
         const userResult = await contract.getMemberDetails(poolId, address)
         const mappedUser = {
           address: userResult[0],
@@ -327,9 +333,40 @@ const PoolIdPage = ({ params }: { params: any }) => {
     }
   }, [params])
 
-  const handleVote = (bidId) => {
-    // Implement voting logic
-    console.log("Voting for bid", bidId)
+  const handleVote = async (bidId, data) => {
+    try {
+      // Implement voting logic
+      console.log("Voting for bid", bidId)
+
+      /**
+       * PoolId, BidId, true,address,root,nullifierhash, proof
+       */
+
+      const signer = await getEthersSigner(wagmiConfig)
+      // Ensure this function returns a valid ethers provider
+      const contract = new ethers.Contract(
+        XChainChitFundContract,
+        PoolFundABI,
+        signer
+      )
+
+      const unpackedProof = decodeAbiParameters([{ type: 'uint256[8]' }], data.proof)[0]
+
+      const res = await contract.voteOnBid(params.poolId, bidId, true, address, data.merkle_root, data.nullifier_hash, unpackedProof)
+      console.log("res", res);
+      toast({
+        title: 'Successfully voted'
+      })
+
+    } catch (error) {
+      console.log("Error", error);
+      toast({
+        variant: 'destructive',
+        title: 'Error in Voting'
+      })
+
+    }
+
   }
 
   return (

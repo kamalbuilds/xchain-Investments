@@ -7,6 +7,7 @@ import {
 } from "@worldcoin/idkit"
 import { Button } from '../ui/button';
 import { decodeAbiParameters } from 'viem';
+import { ThumbsUp } from 'lucide-react';
 const WorldcoinVerification = ({ title, onSuccess }: { title: string, onSuccess: (data: any) => void }) => {
     const { address } = useAccount()
 
@@ -17,7 +18,7 @@ const WorldcoinVerification = ({ title, onSuccess }: { title: string, onSuccess:
     return (
         <IDKitWidget
             // @ts-ignore
-            app_id={'app_a985a117782271b77d7ffd6a60c119ab'}
+            app_id={'app_staging_7461b9bbd3e873b76c098c984ab139ba'}
             action={'verify'}
             signal={address}
             verification_level={VerificationLevel.Orb}
@@ -25,7 +26,7 @@ const WorldcoinVerification = ({ title, onSuccess }: { title: string, onSuccess:
         >
             {({ open }) => (
                 <Button onClick={open} variant="outline">
-                    {title}
+                    <ThumbsUp size={18} className='mr-2' />{title}
                 </Button>
             )}
         </IDKitWidget>
