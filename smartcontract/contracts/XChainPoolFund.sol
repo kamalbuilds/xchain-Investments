@@ -212,7 +212,7 @@ contract XChainPoolFund is CCIPReceiver {
     }
 
     // Create a new pool with parameters grouped into a struct
-    function createPool(PoolParameters memory parwams) public {
+    function createPool(PoolParameters memory params) public {
         poolCounter++;
         Pool storage pool = pools[poolCounter];
         pool.poolId = poolCounter;
@@ -275,7 +275,7 @@ contract XChainPoolFund is CCIPReceiver {
     }
 
  // Modified to handle cross-chain deposits received via CCIP
-    function ccipReceive(Client.Any2EVMMessage memory any2EvmMessage) internal override {
+    function _ccipReceive(Client.Any2EVMMessage memory any2EvmMessage) internal override {
         bytes32 messageId = any2EvmMessage.messageId;
         uint64 sourceChainSelector = any2EvmMessage.sourceChainSelector;
         address sender = abi.decode(any2EvmMessage.sender, (address));
@@ -292,13 +292,16 @@ contract XChainPoolFund is CCIPReceiver {
         Pool storage pool = pools[poolId];
         require(pool.status == PoolStatus.Active, "Pool is not active");
 
-        // Ensure correct token is being used
-        require(token == LINK_TOKEN, "Incorrect token");
 
         // Update the pool state with the received amount
         pool.valueStored += amount;
 
         emit ContributionMade(poolId, sender, amount, pool.currentCycle);
+    }
+
+    function approve(address token, uint256 amount) public {
+             // Approve the CCIP Router to transfer the specified amount of tokens
+        IERC20(token).approve(address(ccipRouter), amount);
     }
 
     // Function to send a cross-chain deposit request using CCIP
@@ -311,10 +314,7 @@ contract XChainPoolFund is CCIPReceiver {
     ) external {
         Pool storage pool = pools[_poolId];
         require(pool.status == PoolStatus.Active, "Pool is not active");
-        require(token == LINK_TOKEN, "Incorrect token");
 
-        // Approve the CCIP Router to transfer the specified amount of tokens
-        IERC20(token).approve(address(ccipRouter), amount);
 
         // Create the token transfer details
 
