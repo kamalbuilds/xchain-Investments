@@ -6,7 +6,6 @@ import { randomBytes, solidityPackedKeccak256 } from "ethers"
 import { useAccount } from "wagmi"
 
 import { Button } from "@/components/ui/button"
-import ProjectsPage from "@/components/PagesProjects"
 import FusionSwap from "@/components/fusion.swap"
 
 export default function Home() {

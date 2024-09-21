@@ -51,7 +51,8 @@
     "tailwindcss-animate": "^1.0.6",
     "vaul": "^0.9.4",
     "viem": "^2.21.9",
-    "wagmi": "^2.12.12"
+    "wagmi": "^2.12.12",
+    "web3": "^4.13.0"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^3.7.2",

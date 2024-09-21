@@ -15,6 +15,8 @@ import { wagmiConfig } from "@/config/wagmi.config"
 const queryClient = new QueryClient()
 
 const Provider = ({ children }: { children: ReactNode }) => {
+
+  
   return (
     <DynamicContextProvider
       settings={{

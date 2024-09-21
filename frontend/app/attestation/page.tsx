@@ -7,10 +7,13 @@ import { SchemaId } from "@/config/signprotocol.config"
 import { wagmiConfig } from "@/config/wagmi.config"
 import { Button } from "@/components/ui/button"
 import { ethers } from "ethers"
-import { useWalletClient } from "wagmi"
+import { walletActions } from "viem"
+import { useWalletClient } from 'wagmi';
 
 const AttestationPage = () => {
   const [address, setAddress] = useState<string | null>(null);
+
+    const walletclient = useWalletClient();
 
   useEffect(() => {
     const connectWallet = async () => {
@@ -32,6 +35,7 @@ const AttestationPage = () => {
 
   const client = new SignProtocolClient(SpMode.OnChain, {
     chain: EvmChains.arbitrumSepolia,
+    walletClient: walletclient
   });
 
   const handleGetSchema = async () => {
@@ -41,7 +45,17 @@ const AttestationPage = () => {
 
   const handleCreateAttestation = async () => {
 
+
+    // const walletclient = await getWalletClientQueryKey(wagmiConfig)
     console.log("client", client, window.ethereum)
+
+    
+  // const client = new SignProtocolClient(SpMode.OnChain, {
+  //   chain: EvmChains.arbitrumSepolia,
+  //   walletClient: walletclient
+  // });
+
+
     const data = {
       name: 'Abhishek',
     }
