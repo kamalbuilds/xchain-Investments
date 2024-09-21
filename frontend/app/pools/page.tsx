@@ -116,7 +116,6 @@ const PoolsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Button onClick={fetchPools}>Refresh Pools List</Button>
       <main className="container mx-auto px-4 py-8">
         <SectionHeading title="Explore Pools" />
         <FilterBar
@@ -129,7 +128,7 @@ const PoolsPage: React.FC = () => {
             <p className="text-muted-foreground">Loading pools...</p>
           </div>
         ) : (
-          <PoolList pools={pools} />
+          <PoolList pools={pools} fetchPools={fetchPools} />
         )}
       </main>
     </div>

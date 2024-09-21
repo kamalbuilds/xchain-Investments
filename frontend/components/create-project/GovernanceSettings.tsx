@@ -51,7 +51,7 @@ export function GovernanceSettings({
           type="number"
           id="penaltyRate"
           name="penaltyRate"
-          placeholder="Penalty Rate"
+          placeholder="Penalty Rate(%)"
           value={poolParams.penaltyRate}
           onChange={handleChange}
         />
