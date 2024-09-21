@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { HashLock, PrivateKeyProviderConnector, SDK } from "1inch-xchain-sdk"
 import { uint8ArrayToHex } from "@1inch/byte-utils"
-import { randomBytes, solidityPackedKeccak256 } from "ethers"
+import { getWalletClient } from "@wagmi/core"
+import { BrowserProvider, randomBytes, solidityPackedKeccak256 } from "ethers"
+import { useWalletClient } from "wagmi"
+import Web3 from "web3"
 
 import { BASE_URL } from "@/config/1inch.config"
-import Web3 from "web3";
-import { getEthersProvider, getEthersSigner, wagmiConfig } from "@/config/wagmi.config";
 import { Web3ProviderConnector } from "@/config/customProvider"
-import { useWalletClient } from "wagmi"
+import {
+  getEthersProvider,
+  getEthersSigner,
+  wagmiConfig,
+} from "@/config/wagmi.config"
 
 function getRandomBytes32(): string {
   return uint8ArrayToHex(randomBytes(32))
@@ -22,15 +27,13 @@ export async function POST(req: NextRequest) {
       dstTokenAddress,
       amount,
       walletAddress,
-    } = await req.json();
+      client,
+    } = await req.json()
 
-    const { data: client } = useWalletClient();
-
-    console.log(client, "client");
+    console.log(client, "client")
 
     const blockchain = new Web3ProviderConnector(
-       // @ts-ignore
-       new BrowserProvider(client.transport, {
+      new BrowserProvider(client.transport, {
         chainId: client.chain.id,
         name: client.chain.name,
       }),
@@ -39,8 +42,8 @@ export async function POST(req: NextRequest) {
     // const sourceChain = 1
     // const destinationChain = 137
 
-    const makerPrivateKey = '0x123....'
-    const makerAddress = '0x123....'
+    const makerPrivateKey = "0x123...."
+    const makerAddress = "0x123...."
 
     // const nodeUrl = ''
 
@@ -49,12 +52,12 @@ export async function POST(req: NextRequest) {
     //   new Web3(nodeUrl)
     // );
 
-      const Ethsigner = await getEthersSigner(wagmiConfig, { chainId: 1 })
-    
+    const Ethsigner = await getEthersSigner(wagmiConfig, { chainId: 1 })
+
     const sdk = new SDK({
       url: "https://api.1inch.dev/fusion-plus",
       authKey: "okz7YzxXA8DPc7eehhXbolnROttzvKYA",
-      blockchainProvider: blockchain
+      blockchainProvider: blockchain,
     })
 
     const params = {
@@ -63,7 +66,7 @@ export async function POST(req: NextRequest) {
       srcTokenAddress: srcTokenAddress,
       dstTokenAddress: dstTokenAddress,
       amount: amount,
-      enableEstimate: false,
+      enableEstimate: true,
     }
 
     const q = await sdk.getQuote(params)

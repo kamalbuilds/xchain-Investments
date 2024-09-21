@@ -16,6 +16,7 @@ import {
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
+import { useToast } from "@/hooks/use-toast"
 
 const JoinModal = ({
   amount,
@@ -27,6 +28,8 @@ const JoinModal = ({
   poolName: string
 }) => {
   console.log("Amount", amount)
+  const { toast } = useToast()
+
 
   const [depositAmount, setDepositAount] = useState(amount)
   const [isLoading, setIsLoading] = useState(false)
@@ -50,9 +53,17 @@ const JoinModal = ({
 
       await tx.wait()
       setIsLoading(false)
+      toast({
+        title: 'Successfully Joined'
+      })
     } catch (error) {
       console.log("Error in joining pool", error)
       setIsLoading(false)
+      toast({
+        variant: 'destructive',
+        title: 'Error in Joining Pool',
+        description: 'Check console for more reason'
+      })
     }
   }
 

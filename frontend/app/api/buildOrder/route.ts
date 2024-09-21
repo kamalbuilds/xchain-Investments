@@ -11,9 +11,11 @@ export async function POST(req: NextRequest) {
       dstTokenAddress,
       amount,
       walletAddress,
+      hashLock,
+      secretHashes,
     } = await req.json()
 
-    const url = `${BASE_URL}/quote/build?srcChain=${sourceChain}&dstChain=${destinationChain}&srcTokenAddress=${srcTokenAddress}&dstTokenAddress=${dstTokenAddress}&amount=${amount}&walletAddress=${walletAddress}`
+    const url = `${BASE_URL}/quote/build?srcChain=${sourceChain}&dstChain=${destinationChain}&srcTokenAddress=${srcTokenAddress}&dstTokenAddress=${dstTokenAddress}&amount=${amount}&walletAddress=${walletAddress}&secretHashes=${secretHashes}`
     console.log("URL", url)
 
     const response = await fetch(url, {

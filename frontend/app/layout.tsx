@@ -9,6 +9,7 @@ import { fontSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 
 import Provider from "./Provider"
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: {
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 <div className="flex-1">{children}</div>
               </div>
               <TailwindIndicator />
+              <Toaster />
             </Provider>
           </ThemeProvider>
         </body>
