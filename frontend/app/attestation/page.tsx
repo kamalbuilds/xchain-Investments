@@ -1,50 +1,57 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { EvmChains, SignProtocolClient, SpMode } from "@ethsign/sp-sdk"
-import { getWalletClient } from "@wagmi/core"
-import { ethers, parseEther, parseUnits } from "ethers"
-import { useAccount, useWalletClient } from "wagmi"
 
 import { SchemaId } from "@/config/signprotocol.config"
 import { wagmiConfig } from "@/config/wagmi.config"
 import { Button } from "@/components/ui/button"
+import { ethers } from "ethers"
+import { useWalletClient } from "wagmi"
 
 const AttestationPage = () => {
-  const result = useWalletClient()
-  const { address } = useAccount()
+  const [address, setAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    const connectWallet = async () => {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const signer = await provider.getSigner();
+          const address = await signer.getAddress();
+          setAddress(address);
+        } catch (error) {
+          console.error('Error connecting to wallet:', error);
+        }
+      }
+    };
+
+    connectWallet();
+  }, []);
+
+
   const client = new SignProtocolClient(SpMode.OnChain, {
-    chain: EvmChains.baseSepolia,
-    // account: result,
-  })
+    chain: EvmChains.arbitrumSepolia,
+  });
 
   const handleGetSchema = async () => {
-    const res = await client.getSchema("0x2c2")
+    const res = await client.getSchema("0xf4")
     console.log("Res", res)
   }
 
   const handleCreateAttestation = async () => {
-    const walletclient = await getWalletClient(wagmiConfig)
-    console.log("wallet client", walletclient)
 
-    const client = new SignProtocolClient(SpMode.OnChain, {
-      chain: EvmChains.baseSepolia,
-      walletClient: walletclient,
-    })
-
-    console.log("Address", address)
-    console.log("client", client)
-    if (!address) return
+    console.log("client", client, window.ethereum)
     const data = {
-      threshold: 1,
+      name: 'Abhishek',
     }
     try {
-      const res = await client.createAttestation({
-        schemaId: "0x2c2",
-        data,
-        indexingValue: `xxx`,
+      const response = await client.createAttestation({
+        schemaId: '0xf4',
+        data: { name: 'Abhishek' },
+        indexingValue: '1234'
       })
-      console.log("Res", res)
+      console.log("response", response)
     } catch (error) {
       console.log("Error", error)
     }
