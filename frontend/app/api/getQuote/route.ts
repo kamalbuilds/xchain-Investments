@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: "Bearer okz7YzxXA8DPc7eehhXbolnROttzvKYA",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_ONE_INCH}`,
         accept: "application/json",
         "Content-type": "application/json",
       },

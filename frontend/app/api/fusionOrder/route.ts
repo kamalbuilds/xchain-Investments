@@ -14,11 +14,16 @@ import {
   getEthersSigner,
   wagmiConfig,
 } from "@/config/wagmi.config"
+import { useEffect } from "react"
+import { set } from "react-hook-form"
+
 
 function getRandomBytes32(): string {
   return uint8ArrayToHex(randomBytes(32))
 }
 export async function POST(req: NextRequest) {
+
+  
   try {
     const {
       sourceChain,
@@ -28,6 +33,7 @@ export async function POST(req: NextRequest) {
       amount,
       walletAddress,
       client,
+      pvd
     } = await req.json();
 
     console.log(client, "client");
@@ -35,20 +41,23 @@ export async function POST(req: NextRequest) {
     // Ensure the client is a valid provider conforming to EIP-1193
     const provider = new Web3(client);
 
+
+    // const blockprovider = new Web3ProviderConnector(provider);
     // Creating Web3ProviderConnector with the validated provider
 
     console.log(provider, "provider");
-    const blockchain = new Web3ProviderConnector(provider?.currentProvider);
 
-    const makerPrivateKey = "0x123....";
-    const makerAddress = "0x123....";
 
-    const Ethsigner = await getEthersSigner(wagmiConfig, { chainId: 1 });
+    // const makerPrivateKey = "0x";
+    // const makerAddress = "0x...";
+
+    // const pvtkey = new PrivateKeyProviderConnector(makerPrivateKey, client);
+
 
     const sdk = new SDK({
       url: "https://api.1inch.dev/fusion-plus",
-      authKey: "okz7YzxXA8DPc7eehhXbolnROttzvKYA",
-      blockchainProvider: blockchain,
+      authKey: process.env.NEXT_PUBLIC_ONE_INCH,
+      blockchainProvider: pvd,
     });
 
     const params = {
@@ -85,6 +94,7 @@ export async function POST(req: NextRequest) {
             })[]
           );
 
+          let placeSuccess = false;
     const place = await sdk
       .placeOrder(q, {
         walletAddress: walletAddress,
@@ -98,14 +108,16 @@ export async function POST(req: NextRequest) {
       })
       .then((orderInfo) => {
         console.log("Order placed", orderInfo);
+    
+         placeSuccess = true;
       })
       .catch((error) => {
         console.error("Failed to place order", error);
       });
+    
+    console.log('Order placed:', placeSuccess ? 'Success' : 'Failed');
 
-    console.log(place, "place");
-
-    return NextResponse.json(place, { status: 200 });
+    return NextResponse.json({ result: 'Order placed successfully' }, { status: 200 });
   } catch (error) {
     console.error("Fetch error:", error);
     return NextResponse.json({ error: error }, { status: 500 });

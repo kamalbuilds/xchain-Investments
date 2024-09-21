@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useAccount, useWalletClient } from "wagmi"
 
 import {
@@ -26,6 +26,7 @@ import { BigNumberish } from "ethers"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
+import Web3 from "web3"
 
 // Define the types for the tokens
 interface Token {
@@ -49,7 +50,7 @@ const DepositModal: React.FC<DepositModalProps> = ({ poolId, poolName }) => {
 
     const [destinationChain, setDestinationChain] = useState<string>("")
     const [destinationToken, setDestinationToken] = useState<string>("")
-
+    const [pvd , setPvd]= useState<Web3>();
     const { data: client } = useWalletClient()
 
 
@@ -90,6 +91,7 @@ const DepositModal: React.FC<DepositModalProps> = ({ poolId, poolName }) => {
                     amount: tokenAmount,
                     walletAddress: address,
                     client,
+                    pvd
                 }),
             })
 
