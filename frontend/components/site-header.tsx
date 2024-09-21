@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { MainNav } from "./main-nav"
 
 export function SiteHeader() {
   
@@ -64,29 +65,19 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Left Side: Logo and Navigation Buttons */}
         <div className="flex items-center space-x-4">
-          {/* Logo */}
-          <h1 className="text-2xl font-bold">FundDAO</h1>
-
-          {/* Navigation Buttons */}
           <nav className="hidden md:flex space-x-2">
-            <Button variant="ghost">Home</Button>
-            <Button variant="ghost">Explore</Button>
-            <Button variant="ghost">Create</Button>
-            <Button variant="ghost">Dashboard</Button>
+            <MainNav items={siteConfig.mainNav} />
           </nav>
         </div>
 
-        {/* Right Side: Social Links, Theme Toggle, Worldcoin Sign-In, and Avatar */}
         <div className="flex items-center space-x-4">
-        <DynamicWidget />
-
-          {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* Worldcoin Sign-In Button */}
+          <DynamicWidget />
+
           <IDKitWidget
+          // @ts-ignore
                 app_id={process.env.NEXT_PUBLIC_APP_ID || "app_undefined"}
                 action={process.env.NEXT_PUBLIC_ACTION_ID || "verify"}
                 signal={address}
@@ -99,12 +90,6 @@ export function SiteHeader() {
               </Button>
             )}
           </IDKitWidget>
-
-          {/* User Avatar */}
-          <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
         </div>
       </div>
     </header>
