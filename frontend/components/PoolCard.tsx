@@ -64,21 +64,21 @@ const PoolCard: React.FC<PoolCardProps> = ({ pool, fetchPools }: { pool: Pool, f
                 <p className="leading-7 [&:not(:first-child)]:mt-6">
                   Value stored
                 </p>
-                <p className="leading-7 ">{pool.valueStored}</p>
+                <p className="leading-7 ">{pool.valueStored} ETH</p>
               </div>
 
               <div className="flex flex-row justify-between">
                 <p className="leading-7 [&:not(:first-child)]:mt-6">
                   Commitment Deposit
                 </p>
-                <p className="leading-7 ">{pool.commitmentDeposit}</p>
+                <p className="leading-7 ">{pool.commitmentDeposit} ETH</p>
               </div>
 
               <div className="flex flex-row justify-between">
                 <p className="leading-7 [&:not(:first-child)]:mt-6">
                   Deposit Amount
                 </p>
-                <p className="leading-7 ">{pool.depositAmount} </p>
+                <p className="leading-7 ">{pool.depositAmount} ETH</p>
               </div>
 
               <div className="flex flex-row justify-between">
@@ -86,7 +86,7 @@ const PoolCard: React.FC<PoolCardProps> = ({ pool, fetchPools }: { pool: Pool, f
                   Deposit Range
                 </p>
                 <p className="leading-7 ">
-                  {pool.minBidAmount} - {pool.maxBidAmount}
+                  {pool.minBidAmount} ETH - {pool.maxBidAmount} ETH
                 </p>
               </div>
 
@@ -94,7 +94,7 @@ const PoolCard: React.FC<PoolCardProps> = ({ pool, fetchPools }: { pool: Pool, f
                 <p className="leading-7 [&:not(:first-child)]:mt-6">
                   Penalty Rate
                 </p>
-                <p className="leading-7 ">{pool.penaltyRate}</p>
+                <p className="leading-7 ">{pool.penaltyRate}%</p>
               </div>
 
               <div className="flex flex-row justify-between">
