@@ -33,7 +33,6 @@ export async function POST(req: NextRequest) {
        new BrowserProvider(client.transport, {
         chainId: client.chain.id,
         name: client.chain.name,
-        ensAddress: client.chain.contracts?.ensRegistry?.address,
       }),
     );
 
