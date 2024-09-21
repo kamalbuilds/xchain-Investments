@@ -1,33 +1,15 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
 import { ethers } from "ethers"
+import React, { useEffect, useState } from "react"
 
-import { XChainChitFundContract } from "@/config/PoolFundContract.config"
-import { getEthersProvider, wagmiConfig } from "@/config/wagmi.config"
-import { PoolFundABI } from "@/lib/ABI"
-import { Button } from "@/components/ui/button"
 import FilterBar from "@/components/FilterBar"
 import PoolList from "@/components/PoolList"
-
-interface Pool {
-  id: number
-  name: string
-  title: string
-  depositAmount: string
-  isAnonymousVoting: boolean
-  depositPeriodDays: number
-  withdrawPeriodDays: number
-  distributeRemainingCycle: boolean
-  valueStored: string
-  minBidAmount: string
-  maxBidAmount: string
-  commitmentDeposit: string
-  penaltyRate: number
-  memberCount: number
-  bidSubmissionDeadline: number
-  currentCycle: number
-}
+import { Button } from "@/components/ui/button"
+import { XChainChitFundContract } from "@/config/PoolFundContract.config"
+import { getEthersProvider, wagmiConfig } from "@/config/wagmi.config"
+import { Pool } from "@/interfaces"; // Adjust the path as necessary
+import { PoolFundABI } from "@/lib/ABI"
 
 function SectionHeading({ title }: { title: string }) {
   return <h2 className="text-3xl font-bold mb-6">{title}</h2>
@@ -45,7 +27,7 @@ const PoolsPage: React.FC = () => {
       setPools(pools)
     } else {
       setFilter(category)
-      setPools(pools.filter((pool) => pool.category === category))
+      // setPools(pools.filter((pool) => pool.category === category))
     }
   }
 
