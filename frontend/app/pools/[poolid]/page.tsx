@@ -28,8 +28,68 @@ function formatAddress(address: string) {
 }
 
 // PoolDetails Component
-function PoolDetails({ pool }: { pool: Pool }) {
-  return (
+const PoolIdPage = ({ params }: { params: any }) => {
+    console.log("params", params);
+
+    const [poolData, setPoolData] = useState<Pool>()
+    const [isLoading, setIsLoading] = useState(false);
+
+    const getPoolData = async (poolId: number) => {
+        if (poolId) {
+            try {
+                setIsLoading(true);
+                const provider = await getEthersProvider(wagmiConfig)
+                // Ensure this function returns a valid ethers provider
+                const contract = new ethers.Contract(
+                    XChainChitFundContract,
+                    PoolFundABI,
+                    provider
+                )
+
+                const result = await contract.pools(poolId);
+
+                console.log("Result", result);
+
+                const mappedPool = {
+                    poolId: parseInt(result[0]),
+                    name: result[1],
+                    title: result[2],
+                    depositAmount: ethers.formatEther(result[3]),
+                    isAnonymousVoting: result[4],
+                    depositPeriodDays: parseInt(result[5]),
+                    withdrawPeriodDays: parseInt(result[6]),
+                    distributeRemainingCycle: result[7],
+                    valueStored: ethers.formatEther(result[8]),
+                    minBidAmount: ethers.formatEther(result[9]),
+                    maxBidAmount: ethers.formatEther(result[10]),
+                    commitmentDeposit: ethers.formatEther(result[11]),
+                    penaltyRate: parseInt(result[12]),
+                    memberCount: parseInt(result[13]),
+                    bidSubmissionDeadline: Number(result[14]),
+                    status: parseInt(result[15]),
+                    createdAt: Number(result[16]),
+                    updatedAt: Number(result[17]),
+                    currentCycle: parseFloat(result[18]),
+                };
+
+                setIsLoading(false);
+                // Store the mapped data in the state
+                setPoolData(mappedPool);
+            } catch (error) {
+                console.log("Error", error);
+            }
+
+        }
+    }
+
+    useEffect(() => {
+        if (params.poolId) {
+            getPoolData(params.poolId)
+        }
+
+    }, [params])
+
+    return (
     <Card>
       <CardHeader>
         <CardTitle>{pool.name}</CardTitle>
