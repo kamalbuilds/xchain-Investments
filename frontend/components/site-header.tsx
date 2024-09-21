@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { DynamicWidget } from "@dynamic-labs/sdk-react-core"
 import {
   IDKitWidget,
@@ -10,15 +9,13 @@ import {
 import { decodeAbiParameters } from "viem"
 import { useAccount } from "wagmi"
 
-import { siteConfig } from "@/config/site"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "@/components/ui/button"
+import { siteConfig } from "@/config/site"
 import { MainNav } from "./main-nav"
 
 export function SiteHeader() {
-  
+
   // Mock function for proof verification, should be replaced with your server-side verification logic
   const verifyProof = async (proof: ISuccessResult) => {
     // Replace this with your actual server route to verify the proof
@@ -63,7 +60,7 @@ export function SiteHeader() {
   const { address } = useAccount()
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
+    <header className="sticky top-0 z-40 p-4 w-full border-b bg-background">
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
           <nav className="hidden md:flex space-x-2">
