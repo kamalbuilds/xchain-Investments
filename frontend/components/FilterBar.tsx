@@ -33,24 +33,7 @@ const FilterBar: React.FC<FilterBarProps> = ({ onFilter, onSearch, activeFilter 
         >
           All
         </Button>
-        <Button
-          onClick={() => onFilter('Environment')}
-          variant={activeFilter === 'Environment' ? 'default' : 'outline'}
-        >
-          Environment
-        </Button>
-        <Button
-          onClick={() => onFilter('Technology')}
-          variant={activeFilter === 'Technology' ? 'default' : 'outline'}
-        >
-          Technology
-        </Button>
-        <Button
-          onClick={() => onFilter('Social')}
-          variant={activeFilter === 'Social' ? 'default' : 'outline'}
-        >
-          Social
-        </Button>
+
       </div>
     </div>
   )

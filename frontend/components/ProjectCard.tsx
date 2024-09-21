@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { ExternalLink } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -24,31 +24,25 @@ import {
 
 import DepositModal from "./DepositModal"
 import JoinModal from "./JoinModal"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { Pool } from "@/types/nav"
 
-interface Project {
-  id: number
-  title: string
-  description: string
-  goal: number
-  raised: number
-  anonymous: boolean
-  monthlyDeposit?: number
-  totalMonths?: number
-  currentMonth?: number
-}
 
-interface ProjectCardProps {
-  project: Project
-}
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ pool }) => {
+const ProjectCard = ({ pool, fetchPools }: { pool: Pool, fetchPools: () => Promise<void> }) => {
+  const router = useRouter();
+
+  const [open, setOpen] = useState(false);
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-xl font-bold flex flex-row justify-between">
           <div className="flex gap-2">
             <p>{pool.name}</p>
-            <ExternalLink />
+            <ExternalLink onClick={() => {
+              router.push(`/pools/${pool.poolId}`)
+            }} />
           </div>
           <Badge variant={pool.isAnonymousVoting ? "secondary" : "outline"}>
             {pool.isAnonymousVoting ? "Anonymous" : "Public"}
@@ -122,30 +116,29 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ pool }) => {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4 ">
-        <Button className="w-full">Submit Bid</Button>
-        <div className="flex w-full flex-row gap-2">
-          <Dialog>
-            <DialogTrigger>
-              <Button className="w-full">Deposit</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DepositModal poolId={pool.poolId} poolName={pool.name} />
-            </DialogContent>
-          </Dialog>
+        <Dialog>
+          <DialogTrigger className="w-full">
+            <Button className="w-full">Deposit</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DepositModal poolId={pool.poolId} poolName={pool.name} />
+          </DialogContent>
+        </Dialog>
 
-          <Dialog>
-            <DialogTrigger>
-              <Button className="w-full">Join</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <JoinModal
-                poolId={pool.poolId}
-                amount={pool.commitmentDeposit}
-                poolName={pool.name}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
+        <Dialog open={open} >
+          <DialogTrigger className="w-full">
+            <Button className="w-full" onClick={() => setOpen(true)}>Join</Button>
+          </DialogTrigger>
+          <DialogContent onInteractOutside={() => setOpen(false)}>
+            <JoinModal
+              poolId={pool.poolId}
+              amount={pool.commitmentDeposit}
+              poolName={pool.name}
+              fetchPools={fetchPools}
+              setOpen={setOpen}
+            />
+          </DialogContent>
+        </Dialog>
       </CardFooter>
     </Card>
   )

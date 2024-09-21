@@ -31,7 +31,6 @@ export function ProjectForm() {
   // Handle input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    console.log("name", name, value)
 
     setPoolParams((prev) => ({
       ...prev,
@@ -39,10 +38,9 @@ export function ProjectForm() {
     }))
   }
 
-  const { writeContract } = useWriteContract()
+  const { writeContract, isPending } = useWriteContract()
 
   const handleCreatePool = async (value: any) => {
-    console.log("value", value)
     writeContract(
       {
         abi: PoolFundABI,
@@ -115,8 +113,8 @@ export function ProjectForm() {
           setPoolParams={setPoolParams}
           handleChange={handleChange}
         />
-        <Button type="submit" className="w-full" onClick={handleCreatePool}>
-          Create Project
+        <Button type="submit" className="w-full" onClick={handleCreatePool} disabled={isPending}>
+          {isPending ? 'Creating...' : 'Create Project'}
         </Button>
       </div>
     </div>

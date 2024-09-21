@@ -22,15 +22,16 @@ const JoinModal = ({
   amount,
   poolId,
   poolName,
+  fetchPools,
+  setOpen
 }: {
   amount?: any
   poolId: number
   poolName: string
+  fetchPools: () => Promise<void>
+  setOpen: (open: boolean) => void
 }) => {
-  console.log("Amount", amount)
   const { toast } = useToast()
-
-
   const [depositAmount, setDepositAount] = useState(amount)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -56,6 +57,8 @@ const JoinModal = ({
       toast({
         title: 'Successfully Joined'
       })
+      fetchPools();
+      setOpen(false)
     } catch (error) {
       console.log("Error in joining pool", error)
       setIsLoading(false)
@@ -73,6 +76,7 @@ const JoinModal = ({
         <DialogTitle>
           Join <span className="underline">{poolName}</span>{" "}
         </DialogTitle>
+
         <DialogDescription className="flex flex-col gap-8 p-12">
           <div className="flex flex-col gap-2">
             <Label htmlFor="amount">Amount(in eth)</Label>
