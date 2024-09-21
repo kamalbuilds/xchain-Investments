@@ -17,7 +17,6 @@ import {
 function getRandomBytes32(): string {
   return uint8ArrayToHex(randomBytes(32))
 }
-
 export async function POST(req: NextRequest) {
   try {
     const {
@@ -28,37 +27,29 @@ export async function POST(req: NextRequest) {
       amount,
       walletAddress,
       client,
-    } = await req.json()
+    } = await req.json();
 
-    console.log(client, "client")
+    console.log(client, "client");
 
-    const blockchain = new Web3ProviderConnector(
-      new BrowserProvider(client.transport, {
-        chainId: client.chain.id,
-        name: client.chain.name,
-      }),
-    );
+    // Ensure the client is a valid provider conforming to EIP-1193
+    const provider = new BrowserProvider(client, {
+      chainId: client.chain.id,
+      name: client.chain.name,
+    });
 
-    // const sourceChain = 1
-    // const destinationChain = 137
+    // Creating Web3ProviderConnector with the validated provider
+    const blockchain = new Web3ProviderConnector(provider);
 
-    const makerPrivateKey = "0x123...."
-    const makerAddress = "0x123...."
+    const makerPrivateKey = "0x123....";
+    const makerAddress = "0x123....";
 
-    // const nodeUrl = ''
-
-    // const blockchainProvider = new PrivateKeyProviderConnector(
-    //   makerPrivateKey,
-    //   new Web3(nodeUrl)
-    // );
-
-    const Ethsigner = await getEthersSigner(wagmiConfig, { chainId: 1 })
+    const Ethsigner = await getEthersSigner(wagmiConfig, { chainId: 1 });
 
     const sdk = new SDK({
       url: "https://api.1inch.dev/fusion-plus",
       authKey: "okz7YzxXA8DPc7eehhXbolnROttzvKYA",
       blockchainProvider: blockchain,
-    })
+    });
 
     const params = {
       srcChainId: sourceChain,
@@ -67,18 +58,18 @@ export async function POST(req: NextRequest) {
       dstTokenAddress: dstTokenAddress,
       amount: amount,
       enableEstimate: true,
-    }
+    };
 
-    const q = await sdk.getQuote(params)
+    const q = await sdk.getQuote(params);
 
-    console.log(q, "q")
+    console.log(q, "q");
 
-    const secretsCount = q?.getPreset().secretsCount
+    const secretsCount = q?.getPreset().secretsCount;
 
     const secrets = Array.from({ length: secretsCount }).map(() =>
       getRandomBytes32()
-    )
-    const secretHashes = secrets.map((x) => HashLock.hashSecret(x))
+    );
+    const secretHashes = secrets.map((x) => HashLock.hashSecret(x));
 
     const hashLock =
       secretsCount === 1
@@ -90,9 +81,9 @@ export async function POST(req: NextRequest) {
                 [i, secretHash.toString()]
               )
             ) as (string & {
-              _tag: "MerkleLeaf"
+              _tag: "MerkleLeaf";
             })[]
-          )
+          );
 
     const place = await sdk
       .placeOrder(q, {
@@ -106,17 +97,17 @@ export async function POST(req: NextRequest) {
         // },
       })
       .then((orderInfo) => {
-        console.log("Order placed", orderInfo)
+        console.log("Order placed", orderInfo);
       })
       .catch((error) => {
-        console.error("Failed to place order", error)
-      })
+        console.error("Failed to place order", error);
+      });
 
-    console.log(place, "place")
+    console.log(place, "place");
 
-    return NextResponse.json(place, { status: 200 })
+    return NextResponse.json(place, { status: 200 });
   } catch (error) {
-    console.error("Fetch error:", error)
-    return NextResponse.json({ error: error }, { status: 500 })
+    console.error("Fetch error:", error);
+    return NextResponse.json({ error: error }, { status: 500 });
   }
 }

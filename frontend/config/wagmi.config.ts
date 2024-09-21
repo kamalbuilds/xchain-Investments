@@ -31,7 +31,7 @@ const customProviderConfig = {
       name: 'Ethereum Mainnet',
       network: 'mainnet',
       rpcUrls: {
-        default: 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID', // Replace with your Infura project ID or another RPC URL
+        default: 'https://ethereum-rpc.publicnode.com', // Replace with your Infura project ID or another RPC URL
       },
       nativeCurrency: {
         name: 'Ether',
