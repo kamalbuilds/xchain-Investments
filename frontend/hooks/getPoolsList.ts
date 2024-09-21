@@ -7,8 +7,8 @@ export const useGetPoolsList = ()=>{
         address: XChainChitFundContract,
         abi: PoolFundABI,
         functionName: "pools",
-        args: [poolId], // Pass the current pool ID
+        // args: [poolId], // Pass the current pool ID
       })
 
-    return()
+    // return()
 }

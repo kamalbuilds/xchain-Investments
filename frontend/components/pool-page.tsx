@@ -1,28 +1,54 @@
-"use client"
+'use client'
 
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import WorldcoinVerification from "@/components/worldcoin/WorldcoinVerification"
-import { XChainChitFundContract } from '@/config/PoolFundContract.config'
-import { getEthersProvider, getEthersSigner, wagmiConfig } from '@/config/wagmi.config'
-import { toast } from "@/hooks/use-toast"
-import { Bid, Pool } from '@/interfaces'
-import { PoolFundABI } from '@/lib/ABI'
-import { ethers } from 'ethers'
-import { Clock } from "lucide-react"
-import { useEffect, useState } from 'react'
-import { decodeAbiParameters } from "viem"
-import { useAccount } from "wagmi"
+import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Clock, DollarSign, Users, Vote } from "lucide-react"
+
+// Mock data and functions (replace with actual data fetching and contract interactions)
+const mockPoolData = {
+  poolId: 1,
+  name: "Community Savings Pool",
+  title: "Help each other grow financially",
+  depositAmount: 100,
+  isAnonymousVoting: true,
+  depositPeriodDays: 30,
+  withdrawPeriodDays: 5,
+  distributeRemainingCycle: true,
+  valueStored: 1000,
+  minBidAmount: 50,
+  maxBidAmount: 200,
+  commitmentDeposit: 10,
+  penaltyRate: 5,
+  memberCount: 10,
+  bidSubmissionDeadline: Date.now() + 86400000, // 24 hours from now
+  currentCycle: 3
+}
+
+const mockBids = [
+  { id: 1, bidder: "0x1234...5678", amount: 150, votes: 3 },
+  { id: 2, bidder: "0x5678...9012", amount: 180, votes: 2 },
+  { id: 3, bidder: "0x9012...3456", amount: 120, votes: 1 },
+]
+
+const mockUserData = {
+  address: "0x1234...5678",
+  totalContributions: 300,
+  totalWinnings: 500,
+  totalPenalties: 0,
+  isActive: true
+}
 
 function formatAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
-function PoolDetails({ pool }: { pool: Pool }) {
+function PoolDetails({ pool }) {
   return (
     <Card>
       <CardHeader>
@@ -69,7 +95,7 @@ function PoolDetails({ pool }: { pool: Pool }) {
   )
 }
 
-function BidsList({ bids, onVote }: { bids: Bid[], onVote: Function }) {
+function BidsList({ bids, onVote }) {
   return (
     <Card>
       <CardHeader>
@@ -77,17 +103,15 @@ function BidsList({ bids, onVote }: { bids: Bid[], onVote: Function }) {
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">
-          {bids.map((bid, index) => (
-            <li key={index} className="flex items-center justify-between">
+          {bids.map((bid) => (
+            <li key={bid.id} className="flex items-center justify-between">
               <div>
                 <p className="font-medium">{formatAddress(bid.bidder)}</p>
                 <p className="text-sm text-muted-foreground">{bid.amount} ETH</p>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-sm">{bid.votes} votes</span>
-                <WorldcoinVerification title='Vote In' onSuccess={(data) => {
-                  onVote(bid.id, data)
-                }} />
+                <Button size="sm" onClick={() => onVote(bid.id)}>Vote</Button>
               </div>
             </li>
           ))}
@@ -97,7 +121,7 @@ function BidsList({ bids, onVote }: { bids: Bid[], onVote: Function }) {
   )
 }
 
-function UserActions({ pool }: { pool: Pool }) {
+function UserActions({ pool, user }) {
   const [depositAmount, setDepositAmount] = useState("")
   const [withdrawAmount, setWithdrawAmount] = useState("")
   const [bidAmount, setBidAmount] = useState("")
@@ -186,8 +210,8 @@ function TimeRemaining({ deadline }) {
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date().getTime()
-      const distance = deadline * 1000 - now // Convert deadline to milliseconds
-
+      const distance = deadline - now
+      
       if (distance < 0) {
         clearInterval(timer)
         setTimeLeft("Expired")
@@ -196,7 +220,7 @@ function TimeRemaining({ deadline }) {
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
         const seconds = Math.floor((distance % (1000 * 60)) / 1000)
-
+        
         setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`)
       }
     }, 1000)
@@ -250,151 +274,26 @@ function UserStats({ user }) {
   )
 }
 
-const PoolIdPage = ({ params }: { params: any }) => {
-  const [poolData, setPoolData] = useState(null)
-  const [bids, setBids] = useState([])
-  const [userData, setUserData] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-
-  const { address } = useAccount();
-
-  const getPoolData = async (poolId: number) => {
-    if (poolId) {
-      try {
-        setIsLoading(true)
-        const provider = await getEthersProvider(wagmiConfig)
-        // Ensure this function returns a valid ethers provider
-        const contract = new ethers.Contract(
-          XChainChitFundContract,
-          PoolFundABI,
-          provider
-        )
-
-        // Fetch pool details
-        const result = await contract.getPoolDetails(poolId)
-        console.log("Result", result);
-        const mappedPool = {
-          poolId: parseInt(result[0]),
-          name: result[1],
-          title: result[2],
-          depositAmount: ethers.formatEther(result[3]),
-          isAnonymousVoting: result[4],
-          depositPeriodDays: parseInt(result[5]),
-          withdrawPeriodDays: parseInt(result[6]),
-          distributeRemainingCycle: result[7],
-          valueStored: ethers.formatEther(result[8]),
-          minBidAmount: ethers.formatEther(result[9]),
-          maxBidAmount: ethers.formatEther(result[10]),
-          commitmentDeposit: ethers.formatEther(result[11]),
-          penaltyRate: parseInt(result[12]),
-          memberCount: parseInt(result[13]),
-          bidSubmissionDeadline: Number(result[14]),
-          status: parseInt(result[15]),
-          createdAt: Number(result[16]),
-          updatedAt: Number(result[17]),
-          members: result[18],
-          currentCycle: parseInt(result[19]),
-        }
-        setPoolData(mappedPool)
-
-        // Fetch bids for current cycle
-        const bidsResult = await contract.getAllBids(poolId, mappedPool.currentCycle)
-        console.log
-        const mappedBids = bidsResult.map((bid, index) => ({
-          id: index,
-          bidder: bid.bidder,
-          amount: ethers.formatEther(bid.bidAmount),
-          votes: parseInt(bid.voteCount),
-        }))
-        setBids(mappedBids)
-
-
-        const userResult = await contract.getMemberDetails(poolId, address)
-        const mappedUser = {
-          address: userResult[0],
-          totalContributions: ethers.formatEther(userResult[1]),
-          totalWinnings: ethers.formatEther(userResult[2]),
-          totalPenalties: ethers.formatEther(userResult[3]),
-          isActive: userResult[4],
-        }
-        setUserData(mappedUser)
-
-        setIsLoading(false)
-      } catch (error) {
-        console.log("Error", error)
-        setIsLoading(false)
-      }
-    }
-  }
-
-  useEffect(() => {
-    if (params.poolId) {
-      getPoolData(params.poolId)
-    }
-  }, [params])
-
-  const handleVote = async (bidId, data) => {
-    try {
-      // Implement voting logic
-      console.log("Voting for bid", bidId)
-
-      /**
-       * PoolId, BidId, true,address,root,nullifierhash, proof
-       */
-
-      const signer = await getEthersSigner(wagmiConfig)
-      // Ensure this function returns a valid ethers provider
-      const contract = new ethers.Contract(
-        XChainChitFundContract,
-        PoolFundABI,
-        signer
-      )
-
-      const unpackedProof = decodeAbiParameters([{ type: 'uint256[8]' }], data.proof)[0]
-
-      const res = await contract.voteOnBid(params.poolId, bidId, true, address, data.merkle_root, data.nullifier_hash, unpackedProof)
-      console.log("res", res);
-      toast({
-        title: 'Successfully voted'
-      })
-
-    } catch (error) {
-      console.log("Error", error);
-      toast({
-        variant: 'destructive',
-        title: 'Error in Voting'
-      })
-
-    }
-
+export function PoolPageComponent() {
+  const handleVote = (bidId) => {
+    // Implement voting logic
+    console.log("Voting for bid", bidId)
   }
 
   return (
-    <div className='container mx-auto p-4'>
-      {isLoading && (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Loading pool data...</p>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Pool Details</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <PoolDetails pool={mockPoolData} />
+          <TimeRemaining deadline={mockPoolData.bidSubmissionDeadline} />
+          <UserActions pool={mockPoolData} user={mockUserData} />
+          <UserStats user={mockUserData} />
         </div>
-      )}
-
-      {!isLoading && poolData && (
         <div>
-          <h1 className="text-3xl font-bold mb-6">Pool Details</h1>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-6">
-              <PoolDetails pool={poolData} />
-              <TimeRemaining deadline={poolData.bidSubmissionDeadline} />
-              {userData && <UserActions pool={poolData} user={userData} />}
-              {userData && <UserStats user={userData} />}
-            </div>
-            <div>
-              <BidsList bids={bids} onVote={handleVote} />
-            </div>
-          </div>
+          <BidsList bids={mockBids} onVote={handleVote} />
         </div>
-      )}
+      </div>
     </div>
   )
 }
-
-export default PoolIdPage

@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState } from "react"
 import { ExternalLink } from "lucide-react"
+import React, { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -16,28 +16,27 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog"
 
+import { Pool } from "@/interfaces"
+import { useRouter } from "next/navigation"
 import DepositModal from "./DepositModal"
 import JoinModal from "./JoinModal"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Pool } from "@/types/nav"
 
+interface PoolCardProps {
+  pool: Pool
+  fetchPools: () => Promise<void>
+}
 
-
-const ProjectCard = ({ pool, fetchPools }: { pool: Pool, fetchPools: () => Promise<void> }) => {
+const PoolCard: React.FC<PoolCardProps> = ({ pool, fetchPools }: { pool: Pool, fetchPools: () => Promise<void> }) => {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-xl font-bold flex flex-row justify-between">
+        <CardTitle className="flex flex-row justify-between text-xl font-bold">
           <div className="flex gap-2">
             <p>{pool.name}</p>
             <ExternalLink onClick={() => {
@@ -65,21 +64,21 @@ const ProjectCard = ({ pool, fetchPools }: { pool: Pool, fetchPools: () => Promi
                 <p className="leading-7 [&:not(:first-child)]:mt-6">
                   Value stored
                 </p>
-                <p className="leading-7 ">{pool.valueStored}</p>
+                <p className="leading-7 ">{pool.valueStored} ETH</p>
               </div>
 
               <div className="flex flex-row justify-between">
                 <p className="leading-7 [&:not(:first-child)]:mt-6">
                   Commitment Deposit
                 </p>
-                <p className="leading-7 ">{pool.commitmentDeposit}</p>
+                <p className="leading-7 ">{pool.commitmentDeposit} ETH</p>
               </div>
 
               <div className="flex flex-row justify-between">
                 <p className="leading-7 [&:not(:first-child)]:mt-6">
                   Deposit Amount
                 </p>
-                <p className="leading-7 ">{pool.depositAmount} </p>
+                <p className="leading-7 ">{pool.depositAmount} ETH</p>
               </div>
 
               <div className="flex flex-row justify-between">
@@ -87,7 +86,7 @@ const ProjectCard = ({ pool, fetchPools }: { pool: Pool, fetchPools: () => Promi
                   Deposit Range
                 </p>
                 <p className="leading-7 ">
-                  {pool.minBidAmount} - {pool.maxBidAmount}
+                  {pool.minBidAmount} ETH - {pool.maxBidAmount} ETH
                 </p>
               </div>
 
@@ -95,7 +94,7 @@ const ProjectCard = ({ pool, fetchPools }: { pool: Pool, fetchPools: () => Promi
                 <p className="leading-7 [&:not(:first-child)]:mt-6">
                   Penalty Rate
                 </p>
-                <p className="leading-7 ">{pool.penaltyRate}</p>
+                <p className="leading-7 ">{pool.penaltyRate}%</p>
               </div>
 
               <div className="flex flex-row justify-between">
@@ -144,4 +143,4 @@ const ProjectCard = ({ pool, fetchPools }: { pool: Pool, fetchPools: () => Promi
   )
 }
 
-export default ProjectCard
+export default PoolCard
