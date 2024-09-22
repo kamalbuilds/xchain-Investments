@@ -94,6 +94,10 @@ ChainLink Functions along with Coinmarketcap api used -> https://functions.chain
 - **Purpose**: Hosts AI agents responsible for proof verification and contract execution, ensuring smooth, secure operations of the platform.
 - **Usage**: Verifies smart contracts and manages complex transactions, maintaining system integrity and performance.
 
+#### **Morph Holesky**
+- **Purpose**: XChainFund Pool Investment is a decentralized platform designed to modernize community-based investments with advanced blockchain integrations,
+- **Usage**: Deployed XChainFund.sol on Morph Holesky Testnet. Here is the contract address :- https://explorer-holesky.morphl2.io/tx/0x612888df3f504dfba90072e4ce19779ddc008a70de4618cc68e122d8699a7638.
+
 #### **Sign Protocol**
 - **Purpose**: An omni-chain attestation protocol that allows users to attest and verify information on-chain, used to sign the winning bid details at the end of each cycle.
 - **Schema**:
