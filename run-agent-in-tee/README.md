@@ -1,3 +1,11 @@
+Function Consumer Contract - 0x883cB65FFEb31B92c27De8f65E556d7E78A09c7e
+
+
+https://sepolia.etherscan.io/tx/0x74158cd84b673434a5814dde2d7ec511458f0b33a45bb0d22daee28b2b0439a4
+
+
+### Built with Phala <> The Graph <> ChainLink Functions
+
 <div align="center">
   <a href="https://github.com/Phala-Network/ai-agent-contract-viem">
     <h1>AI Agent Contract Template + Viem SDK</h1>
