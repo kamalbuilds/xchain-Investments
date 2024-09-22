@@ -66,13 +66,13 @@ XChain Pool Investments aims to modernize this concept by integrating blockchain
 - **Crypto Investors**: Users looking for decentralized alternatives to traditional investment models.
 - **Blockchain Enthusiasts**: Those who value the ability to participate and vote anonymously without biases or external influence.
 
-### 4. Target Protocols and Integration Details
+### 4. Built with >>>>
 
 #### **1inch (Fusion+ Swap)**
 - **Purpose**: Used during the deposit phase, allowing users to swap assets across any Ethereum-based chain, facilitating flexible deposits.
 - **Usage**: Finds the optimal swap route, minimizing slippage and fees while ensuring users can participate with their preferred assets.
 
-#### **Uniswap v4**
+#### **Uniswap v4 hooks**
 - **Purpose**: Manages liquidity within defined ranges set by users, allowing for dynamic fee adjustments based on market conditions.
 - **Integration**: Uses a custom hook (`UniswapV4Hook.sol`) that adjusts fees dynamically using market data, enhancing pool sustainability and performance.
 
@@ -87,6 +87,8 @@ XChain Pool Investments aims to modernize this concept by integrating blockchain
 #### **ChainLink (CCIP)**
 - **Purpose**: Enables secure cross-chain token transfers and messaging, allowing seamless communication and asset movement between blockchains.
 - **Usage**: Ensures interoperability, connecting XChain Pool Investments with other blockchain ecosystems for a fluid user experience.
+
+ChainLink Functions along with Coinmarketcap api used -> https://functions.chain.link/sepolia/3542
 
 #### **Phala**
 - **Purpose**: Hosts AI agents responsible for proof verification and contract execution, ensuring smooth, secure operations of the platform.
