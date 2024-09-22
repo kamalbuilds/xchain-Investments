@@ -1,7 +1,5 @@
 ## XChain Pool Investments
 
----
-
 ### 1. Introduction and Key Features
 
 **XChain Pool Investments** is a decentralized platform designed to modernize community-based investments with advanced blockchain integrations, private bidding, and cross-chain functionalities. The platform allows participants to join pools, make contributions, and bid on funds, maintaining privacy and minimizing biases.
@@ -18,8 +16,6 @@
 - **Sign Protocol Integration**: Use Sign Protocol, an omni-chain attestation protocol, to sign and store winning bid details at the end of each cycle.
 - **Investment of Remaining Funds**: After withdrawals, remaining pool funds are invested using AI Agents in the best DeFi opportunities across multiple chains, utilizing CCIP for easy swaps.
 - **Secure Withdrawals**: Members receive their withdrawals at the end of all cycles, ensuring proper distribution of funds.
-
----
 
 ### 2. Problem Statement
 
@@ -55,8 +51,6 @@ Consider a group of 10 people who agree to contribute $100 each month for 10 mon
 
 XChain Pool Investments aims to modernize this concept by integrating blockchain technology to enhance transparency, security, and efficiency. By incorporating privacy features and decentralized governance, the platform eliminates biases and fraud risks associated with traditional chit funds.
 
----
-
 ### 3. Expected Users and User Base
 
 **Targeted Users**:
@@ -71,8 +65,6 @@ XChain Pool Investments aims to modernize this concept by integrating blockchain
 - **General Public**: Everyday users seeking an investment platform that offers anonymity, transparency, and secure fund management.
 - **Crypto Investors**: Users looking for decentralized alternatives to traditional investment models.
 - **Blockchain Enthusiasts**: Those who value the ability to participate and vote anonymously without biases or external influence.
-
----
 
 ### 4. Target Protocols and Integration Details
 
@@ -112,6 +104,8 @@ XChain Pool Investments aims to modernize this concept by integrating blockchain
     - `PeriodicCycleNumber`: The cycle number in which the bid was won.
     - `totalMembers`: Total members in the pool.
 
+Code Usage -> https://github.com/kamalbuilds/xchain-Investments/blob/master/frontend/app/pools/%5BpoolId%5D/page.tsx#L459
+
 ---
 
 ### 5. How XChain Pool Investments Works
@@ -123,7 +117,6 @@ XChain Pool Investments aims to modernize this concept by integrating blockchain
 5. **Investment of Remaining Funds**: After withdrawals, any remaining pool funds are invested by AI Agents into the best DeFi opportunities across multiple chains, utilizing CCIP for seamless swaps.
 6. **Withdrawal**: Withdrawals, along with any returns from investments, are processed at the end of all cycles, ensuring all contributions are accounted for and fairly distributed.
 
----
 
 ### 6. Real-World Example with Pool and Users
 
