@@ -99,18 +99,12 @@ function BidsList({ bids, onVote }: { bids: Bid[], onVote: Function }) {
 }
 
 function UserActions({ pool }: { pool: Pool }) {
-  const [depositAmount, setDepositAmount] = useState("")
   const [withdrawAmount, setWithdrawAmount] = useState("")
   const [bidAmount, setBidAmount] = useState("")
   const [reasonresponse, setReasonResponse] = useState('')
 
   const handleDeposit = async () => {
     try {
-      // Implement deposit logic
-      console.log("Depositing", depositAmount)
-
-      const amount = parseEther(depositAmount)
-
       const signer = await getEthersSigner(wagmiConfig)
 
       const contract = new ethers.Contract(
@@ -120,7 +114,7 @@ function UserActions({ pool }: { pool: Pool }) {
       )
 
       const tx = await contract.contribute(pool.poolId, {
-        value: ethers.parseEther(pool.depositAmount.toString()), // Convert ETH to wei
+        value: ethers.parseEther(pool.depositAmount.toString()),
       })
 
       console.log("Tx>>>", tx);
