@@ -17,18 +17,6 @@ export const siteConfig = {
       title: "Create Pool",
       href: "/create-pool",
     },
-    {
-      title: "Dashboard",
-      href: "/dashboard",
-    },
-    {
-      title: "Groups",
-      href: "/groups",
-    },
-    {
-      title: "Bidding",
-      href: "/bidding",
-    },
   ],
   links: {
     twitter: "https://twitter.com/shadcn",

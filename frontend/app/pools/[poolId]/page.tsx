@@ -453,63 +453,46 @@ const GenerateAttestationPage = ({ pool }: { pool: Pool }) => {
 
   const { address } = useAccount();
   const client = new SignProtocolClient(SpMode.OnChain, {
-    chain: EvmChains.baseSepolia,
+    chain: EvmChains.sepolia,
   });
 
-  console.log("Pool", pool);
-
-
-  const handleGetSchema = async () => {
-    const res = await client.getSchema("0x2f7");
-    console.log("Res", res);
-  }
-
   const handleCreateAttestation = async () => {
-    const provider = await getEthersProvider(wagmiConfig)
-    // Ensure this function returns a valid ethers provider
-    const contract = new ethers.Contract(
-      XChainChitFundContract,
-      PoolFundABI,
-      provider
-    )
+    try {
 
-    const totalMembers = await contract.getPoolMembers(pool.poolId)
-    console.log('totalMembers', totalMembers)
+      const provider = await getEthersProvider(wagmiConfig)
+      // Ensure this function returns a valid ethers provider
+      const contract = new ethers.Contract(
+        XChainChitFundContract,
+        PoolFundABI,
+        provider
+      )
 
-    const response = await contract.poolBids(pool.poolId, pool.currentCycle, address)
-    console.log('response', response)
+      const totalMembers = await contract.getPoolMembers(pool.poolId)
+      console.log('totalMembers', totalMembers)
 
-    if (response[2] > 0) {
-      const attestationData = {
-        walletAddress: response[1],
-        amountWithdraw: response[0],
-        voteCount: zeroPadValue(toBeHex(response[2]), 32),
+      const data = {
+        poolId: pool.poolId,
+        walletAddress: address,
+        cycle: pool.currentCycle,
         reason: '',
-        PeriodicCycleNumber: pool.currentCycle,
-        totalMembers: totalMembers.length,
-        RepaymentPeriod: 0,
+        totalMembers: 5,
       }
 
-      console.log("attestationData", attestationData);
-
-      const res = await client.createAttestation({
-        schemaId: "0x2f7",
-        data: attestationData,
+      const response = await client.createAttestation({
+        schemaId: "0x27b",
+        data,
         indexingValue: "xxx",
-      });
-
-      console.log("res", res);
-
+      })
+      console.log("response", response)
+    } catch (error) {
+      console.log("Error", error)
     }
-
 
   }
 
 
   return (
     <div>
-      <div>hey there</div>
-      <Button onClick={handleGetSchema}>Get schema</Button>
       <Button onClick={handleCreateAttestation}>Create Attestation</Button>
     </div>
   )
