@@ -17,6 +17,8 @@
 - **Investment of Remaining Funds**: After withdrawals, remaining pool funds are invested using AI Agents in the best DeFi opportunities across multiple chains, utilizing CCIP for easy swaps.
 - **Secure Withdrawals**: Members receive their withdrawals at the end of all cycles, ensuring proper distribution of funds.
 
+![image](https://github.com/user-attachments/assets/ecd344df-92a0-4f59-8252-2f9dafb01493)
+
 ### 2. Problem Statement
 
 #### Understanding Chit Funds
